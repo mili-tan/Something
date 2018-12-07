@@ -2,20 +2,26 @@
 header('x-powered-by: TYX/0301');
 header('server: TYX_Server/0.233');
 
+if ($_SERVER['REQUEST_METHOD'] != "GET" || $_SERVER['REQUEST_METHOD'] != "GET") {
+	print "flag{Nice2MEET_U}";
+	return;
+}
+
 if (isset($_GET['key'])){
 	if ($_GET['key'] == "Hello_World"){
-	print "<p>The flag is: <code>flag{Have_Fun}</code></p>";
+	    print "<p>The flag is: <code>flag{Have_Fun}</code></p>";
+		print "<p>接下来 再试试看其他方式请求这个页面~</p>";
 	}
 	else {
-	print "<p>错误的Flag</p>";
+	    print "<p>错误的Flag</p>";
     }
 
 }
-
 ?>
 
 <html>
 <head>
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
 <title>签到题</title>
 </head>
 <body>

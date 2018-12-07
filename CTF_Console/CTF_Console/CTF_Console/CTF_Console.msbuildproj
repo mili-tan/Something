@@ -5,7 +5,7 @@
     <AssemblyName>CTF_Console</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**/*.php" />
+    <Compile Include="**/*.php;**/*.ico" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="**" Exclude="obj/**;bin/**;PublishProfiles/**;@(Compile);$(MsBuildThisFile)">
@@ -14,5 +14,11 @@
       <CopyToOutputDirectory>true</CopyToOutputDirectory>
       <CopyToPublishDirectory>true</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="salad.php" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="salad.php" />
   </ItemGroup>
 </Project>

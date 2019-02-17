@@ -22,15 +22,15 @@ namespace ImgMerge
                 if (mBool)
                 {
                     var bBitmap = new Bitmap(itemFile);
-                    Bitmap img = new Bitmap(aBitmap.Width + bBitmap.Width, Math.Max(aBitmap.Height, bBitmap.Height),
-                        Graphics.FromImage(aBitmap));
+                    Bitmap img = new Bitmap(aBitmap.Width + bBitmap.Width, Math.Max(aBitmap.Height, bBitmap.Height));
+                    //Graphics.FromImage(aBitmap)
                     using (var g0 = Graphics.FromImage(img))
                     {
-                        g0.DrawImage(aBitmap, new Point(0, 0));
-                        g0.DrawImage(bBitmap, new Point(aBitmap.Width - 1, 0));
+                        g0.DrawImage(aBitmap, 0, 0, aBitmap.Width, aBitmap.Height);
+                        g0.DrawImage(bBitmap, aBitmap.Width - 1, 0, aBitmap.Width, aBitmap.Height);
                         g0.Save();
                     }
-
+                    
                     img.Save("./newpic-merge/" + itemFile.Replace("pics\\", "").Replace(".", "-") + "-1.png", ImageFormat.Png);
                     mBool = false;
                 }

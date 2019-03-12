@@ -8,10 +8,20 @@ namespace OhHTTP2Client
     {
         static void Main()
         {
-            using (var httpClient = new HttpClient(new Http2Handler()))
+            using (var http2Client = new HttpClient(new Http2Handler()))
             {
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("OhH2/0.1");
-                var response = httpClient.GetAsync("https://dns.rubyfish.cn/dns-query?name=mili.one").Result;
+                http2Client.DefaultRequestHeaders.UserAgent.ParseAdd("OhH2/0.1");
+                http2Client.DefaultRequestHeaders.Connection.Add("keep-alive");
+                http2Client.Timeout = TimeSpan.FromSeconds(2);
+
+//                http2Client.SendAsync(new HttpRequestMessage
+//                    {
+//                        Method = new HttpMethod("HEAD"),
+//                        RequestUri = new Uri("http://baidu.com/")
+//                    })
+//                    .Result.EnsureSuccessStatusCode();
+
+                var response = http2Client.GetAsync("https://dns.rubyfish.cn/dns-query?name=mili.one").Result;
                 Console.WriteLine(response.RequestMessage.ToString());
                 Console.WriteLine(response.ToString());
                 Console.WriteLine(response.Content.ReadAsStringAsync().Result);

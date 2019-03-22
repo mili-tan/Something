@@ -10,10 +10,14 @@ namespace DNS8484
 
         static void Main()
         {
-            var dnsBase64String = Convert.ToBase64String(GetQuestionData("baidu.com", QueryType.A, null));
-            var dns = new WebClient().DownloadData("https://dns.rubyfish.cn/dns-query?dns=" + dnsBase64String);
-            var dnsMsg = DnsMessage.Parse(dns);
-            Console.WriteLine(dnsMsg.AnswerRecords[0]);
+            var dnsBase64String = Convert.ToBase64String(GetQuestionData("baidu.com", QueryType.A, null)).TrimEnd('=')
+                .Replace('+', '-').Replace('/', '_');
+            Console.WriteLine(dnsBase64String);
+            var dnsMsg =
+                DnsMessage.Parse(new WebClient().DownloadData("https://dns.rubyfish.cn/dns-query?dns=" + dnsBase64String));
+            foreach (var item in dnsMsg.AnswerRecords)
+                Console.WriteLine(item);
+
             Console.ReadKey();
         }
 

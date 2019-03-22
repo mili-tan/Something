@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using ARSoft.Tools.Net.Dns;
 using MyDnsPackage;
 
 namespace DNS8484
@@ -9,8 +10,10 @@ namespace DNS8484
 
         static void Main()
         {
-            var dnsBase64String = Convert.ToBase64String(GetQuestionData("mili.one", QueryType.A, null));
+            var dnsBase64String = Convert.ToBase64String(GetQuestionData("baidu.com", QueryType.A, null));
             var dns = new WebClient().DownloadData("https://dns.rubyfish.cn/dns-query?dns=" + dnsBase64String);
+            var dnsMsg = DnsMessage.Parse(dns);
+            Console.WriteLine(dnsMsg.AnswerRecords[0]);
             Console.ReadKey();
         }
 

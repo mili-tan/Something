@@ -33,6 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ARSoft.Tools.Net, Version=2.2.9.0, Culture=neutral, PublicKeyToken=1940454cd762ec57, processorArchitecture=MSIL">
+      <HintPath>..\packages\ARSoft.Tools.Net.2.2.9\lib\net45\ARSoft.Tools.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.1\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,25 +49,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyDnsPackage\enum.cs" />
-    <Compile Include="MyDnsPackage\MyDns.cs" />
-    <Compile Include="MyDnsPackage\MyDnsHeader.cs" />
-    <Compile Include="MyDnsPackage\MyDnsQuestion.cs" />
-    <Compile Include="MyDnsPackage\MyDnsRecord.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\A_RR.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\CNAME_RR.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\MX_RR.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\NS_RR.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\SOA_RR.cs" />
-    <Compile Include="MyDnsPackage\ResourceRecord\TXT_RR.cs" />
+    <Compile Include="OhMyDns\Enum.cs" />
+    <Compile Include="OhMyDns\MyDns.cs" />
+    <Compile Include="OhMyDns\MyDnsHeader.cs" />
+    <Compile Include="OhMyDns\MyDnsQuestion.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\A_RR.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\CNAME_RR.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\MX_RR.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\NS_RR.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\SOA_RR.cs" />
+    <Compile Include="OhMyDns\ResourceRecord\TXT_RR.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="MyDnsPackage\MyDnsPackage.csproj" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

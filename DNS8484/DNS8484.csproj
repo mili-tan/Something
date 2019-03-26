@@ -50,15 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OhMyDns\Enum.cs" />
-    <Compile Include="OhMyDns\MyDns.cs" />
     <Compile Include="OhMyDns\MyDnsHeader.cs" />
     <Compile Include="OhMyDns\MyDnsQuestion.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\A_RR.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\CNAME_RR.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\MX_RR.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\NS_RR.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\SOA_RR.cs" />
-    <Compile Include="OhMyDns\ResourceRecord\TXT_RR.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

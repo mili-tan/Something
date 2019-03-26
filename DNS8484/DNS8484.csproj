@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OhMyDns\Enum.cs" />
+    <Compile Include="OhMyDns\MyDnsSend.cs" />
     <Compile Include="OhMyDns\MyDnsHeader.cs" />
     <Compile Include="OhMyDns\MyDnsQuestion.cs" />
     <Compile Include="Program.cs" />

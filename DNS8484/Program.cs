@@ -10,7 +10,7 @@ namespace DNS8484
 
         static void Main()
         {
-            var dnsBase64String = Convert.ToBase64String(MyDns.GetQuestionData("dnsp1.mili.one", RecordType.CName)).TrimEnd('=')
+            var dnsBase64String = Convert.ToBase64String(MyDnsSend.GetQuestionData("dnsp1.mili.one", RecordType.Aaaa)).TrimEnd('=')
                 .Replace('+', '-').Replace('/', '_');
             Console.WriteLine(dnsBase64String);
             var dnsMsg =

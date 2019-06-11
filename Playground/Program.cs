@@ -11,6 +11,13 @@ namespace Playground
     {
         static void Main()
         {
+            SC.Shortcut link = new SC.Shortcut();
+            link.Load($"{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}\\Telegram.lnk");
+
+            Console.WriteLine(
+                "path = {0}\nargs = {1}\ndirectory = {2}",
+                link.Path, link.Arguments, link.WorkingDirectory);
+
             foreach (var ni in GetAllNetworkInterfaces())
             {
                 if (ni.OperationalStatus == Up)

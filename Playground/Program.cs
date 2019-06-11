@@ -12,7 +12,11 @@ namespace Playground
         static void Main()
         {
             SC.Shortcut link = new SC.Shortcut();
-            link.Load($"{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}\\Telegram.lnk");
+            //link.Load($"{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}\\Telegram.lnk");
+            link.Path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            link.Description = "桌面面面面面面面";
+            
+            link.Save("my.lnk");
 
             Console.WriteLine(
                 "path = {0}\nargs = {1}\ndirectory = {2}",

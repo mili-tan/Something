@@ -2,6 +2,7 @@
 using System.Net;
 using ARSoft.Tools.Net;
 using ARSoft.Tools.Net.Dns;
+using SC;
 using static System.Net.NetworkInformation.NetworkInterface;
 using static System.Net.NetworkInformation.OperationalStatus;
 
@@ -11,13 +12,14 @@ namespace Playground
     {
         static void Main()
         {
-            SC.Shortcut link = new SC.Shortcut();
+            Shortcut link = new Shortcut();
             //link.Load($"{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}\\Telegram.lnk");
             link.Path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             link.Description = "桌面面面面面面面";
             
-            link.Save("my.lnk");
+            link.Save(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\my.lnk");
 
+            Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.Startup));
             Console.WriteLine(
                 "path = {0}\nargs = {1}\ndirectory = {2}",
                 link.Path, link.Arguments, link.WorkingDirectory);

@@ -19,17 +19,26 @@ def index():
 @app.route('/s2p/add')
 def add():
     ip = request.remote_addr
-    os.popen(addcmd.format(ip))
+    if os.geteuid() != 0:
+        os.popen(addcmd.format(ip))
+    else:
+        os.popen('sudo ' + addcmd.format(ip))
     return "Success! Now your ip " + ip + " is added to the rules."
 
 @app.route('/s2p/add/<ip>')
 def addip(ip):
-    os.popen(addcmd.format(ip))
+    if os.geteuid() != 0:
+        os.popen(addcmd.format(ip))
+    else:
+        os.popen('sudo ' + addcmd.format(ip))
     return "Success! Now ip " + ip + " is added to the rules."
 
 @app.route('/s2p/del/<ip>')
 def delip(ip):
-    os.popen(delcmd.format(ip))
+    if os.geteuid() != 0:
+        os.popen(addcmd.format(ip))
+    else:
+        os.popen('sudo ' + delcmd.format(ip))
     return "Success! Now ip " + ip + " is removed from the rules."
 
 

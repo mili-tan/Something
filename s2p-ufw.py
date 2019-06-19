@@ -8,6 +8,7 @@ app = Flask(__name__)
 wsgi_app = app.wsgi_app
 
 addcmd = "ufw allow from {}"
+delcmd = "ufw delete allow from {}"
 
 @app.route('/')
 @app.route('/myip')
@@ -16,15 +17,21 @@ def index():
     return request.remote_addr
 
 @app.route('/s2p/add')
-def s2p():
+def add():
     ip = request.remote_addr
     os.popen(addcmd.format(ip))
     return "Success! Now your ip " + ip + " is added to the rules."
 
 @app.route('/s2p/add/<ip>')
-def s2pip(ip):
+def addip(ip):
     os.popen(addcmd.format(ip))
     return "Success! Now ip " + ip + " is added to the rules."
+
+@app.route('/s2p/del/<ip>')
+def delip(ip):
+    os.popen(delcmd.format(ip))
+    return "Success! Now ip " + ip + " is removed from the rules."
+
 
 if __name__ == '__main__':
     print('mS2p')

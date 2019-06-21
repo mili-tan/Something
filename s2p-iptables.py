@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import request,jsonify,make_response
-import os
+import os,subprocess
 
 app = Flask(__name__)
 
@@ -10,6 +10,7 @@ wsgi_app = app.wsgi_app
 eth = "eth0"
 addcmd = "iptables -I INPUT 1 -s {}/32 -i {} -j ACCEPT"
 delcmd = "iptables -D INPUT -s {}/32 -i {} -j ACCEPT"
+checkcmd = "iptables -C INPUT -s {}/32 -i {} -j ACCEPT"
 
 @app.route('/')
 @app.route('/myip')
@@ -27,7 +28,7 @@ def add():
     return "Success! Now your ip " + ip + " is added to the rules."
 
 @app.route('/s2p/add/<ip>')
-def addip(ip):
+def addIp(ip):
     if os.geteuid() != 0:
         os.popen(addcmd.format(ip))
     else:
@@ -35,17 +36,26 @@ def addip(ip):
     return "Success! Now ip " + ip + " is added to the rules."
 
 @app.route('/s2p/del/<ip>')
-def delip(ip):
+def delIp(ip):
     if os.geteuid() != 0:
-        os.popen(addcmd.format(ip))
+        os.popen(delcmd.format(ip))
     else:
-        os.popen('sudo ' + delcmd.format(ip))
+        os.popen('sudo ' + delcmd.format(ip,eth))
     return "Success! Now ip " + ip + " is removed from the rules."
 
+@app.route('/s2p/get/<ip>')
+def getIpExist(ip):
+    code = 010
+    if os.geteuid() != 0:
+        #code = os.popen(checkcmd.format(ip,eth) + '; echo $?').read()
+        code = os.system(checkcmd.format(ip,eth))/255
+    else:
+        #code = os.popen('sudo ' + checkcmd.format(ip,eth) + '; echo $?').read()
+        code = os.system('sudo ' + checkcmd.format(ip,eth))/255
+    return str(code)
 
 if __name__ == '__main__':
     print('mS2p')
-    import os
     HOST = os.environ.get('SERVER_HOST', '0.0.0.0')
     try:
         PORT = int(os.environ.get('SERVER_PORT', '5555'))

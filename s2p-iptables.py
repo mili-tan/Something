@@ -7,8 +7,9 @@ app = Flask(__name__)
 # Make the WSGI interface available at the top level so wfastcgi can get it.
 wsgi_app = app.wsgi_app
 
-addcmd = "iptables -A INPUT -p tcp -s {} -j ACCEPT"
-delcmd = "iptables -D INPUT -p tcp -s {} -j ACCEPT"
+eth = "eth0"
+addcmd = "iptables -I INPUT 1 -s {}/32 -i {} -j ACCEPT"
+delcmd = "iptables -D INPUT -s {}/32 -i {} -j ACCEPT"
 
 @app.route('/')
 @app.route('/myip')
@@ -22,7 +23,7 @@ def add():
     if os.geteuid() != 0:
         os.popen(addcmd.format(ip))
     else:
-        os.popen('sudo ' + addcmd.format(ip))
+        os.popen('sudo ' + addcmd.format(ip,eth))
     return "Success! Now your ip " + ip + " is added to the rules."
 
 @app.route('/s2p/add/<ip>')
@@ -30,7 +31,7 @@ def addip(ip):
     if os.geteuid() != 0:
         os.popen(addcmd.format(ip))
     else:
-        os.popen('sudo ' + addcmd.format(ip))
+        os.popen('sudo ' + addcmd.format(ip,eth))
     return "Success! Now ip " + ip + " is added to the rules."
 
 @app.route('/s2p/del/<ip>')

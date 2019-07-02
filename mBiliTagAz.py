@@ -1,3 +1,12 @@
+#------------------------------------------------------------------------------------------------------------------------
+# * Copyright (c) 2017-2019 INARI. All Rights Reserved.
+# * 
+# * This code is licensed under the MIT License.
+# *
+# * Author : Milkey
+# * Version: 0.3
+#------------------------------------------------------------------------------------------------------------------------
+
 import json,time,openpyxl
 import requests
 from openpyxl import Workbook

@@ -2,7 +2,10 @@ import json,time,openpyxl
 import requests
 from openpyxl import Workbook
 
-req = requests.get('https://api.bilibili.com/x/tag/detail?pn=1&ps=40&tag_id=tid')
+tid = 1
+page = 1
+
+req = requests.get('https://api.bilibili.com/x/tag/detail?pn={}&ps=40&tag_id={}'.format(page,tid))
 
 jStr = str(req.content,'utf-8')
 jObj = json.loads(jStr)
@@ -28,5 +31,5 @@ for r in resObj:
     tag = r['dynamic']
     wSheet.append([avNum, title, desc, upUser, upTime, ' ', view, danmaku, reply, favorite, coin ,' ', tag])
 
-wBook.save("detail.xlsx")
+wBook.save("[]-[].xlsx")
     

@@ -13,14 +13,14 @@ from openpyxl import Workbook
 
 tagId = 1
 
-preq = requests.get('https://api.bilibili.com/x/tag/detail?pn={}&ps=40&tag_id={}'.format(1,tagId))
-ppage = math.ceil(json.loads(str(preq.content,'utf-8'))['data']['news']['count']/40)
+pReq = requests.get('https://api.bilibili.com/x/tag/detail?pn={}&ps=40&tag_id={}'.format(1,tagId))
+pPage = math.ceil(json.loads(str(pReq.content,'utf-8'))['data']['news']['count']/40)
 
 wBook = Workbook()
 wSheet = wBook.active
 wSheet.append(['AV号', '标题', '简介', 'up主', '上传时间', '视频时长', ' ', '播放', '弹幕', '回复', '收藏', '硬币' ,' ', '动态标签'])
 
-for page in range(1,ppage+1):
+for page in range(1,pPage+1):
     req = requests.get('https://api.bilibili.com/x/tag/detail?pn={}&ps=40&tag_id={}'.format(page,tagId))
     jObj = json.loads(str(req.content,'utf-8'))
     resObj = jObj['data']['news']['archives']

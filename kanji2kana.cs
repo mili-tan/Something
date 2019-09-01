@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using WanaKanaSharp;
 
@@ -9,7 +11,11 @@ namespace KanjiTest
         [STAThread]
         static void Main(string[] args)
         {
+            var words = File.ReadAllLines(args.Length == 0 ? "words.txt" : args[0]);
+
             var hepburnConverter = new HepburnConverter();
+            List<string> kanaStrings = new List<string>();
+            List<string> romajiStrings = new List<string>();
             try
             {
                 var ifeLang = Activator.CreateInstance(Type.GetTypeFromProgID("MSIME.Japan")) as IFELanguage;
@@ -17,14 +23,35 @@ namespace KanjiTest
                 if (hr != 0)
                     throw Marshal.GetExceptionForHR(hr);
 
-                hr = ifeLang.GetPhonetic("けど想うほどに", 1, -1, out var yomigana);
-                if (hr != 0)
+                foreach (var item in words)
                 {
-                    throw Marshal.GetExceptionForHR(hr);
-                }
-                Console.WriteLine("Kana:" + yomigana);
-                Console.WriteLine("Romaji:" + WanaKana.ToRomaji(hepburnConverter, yomigana));
+                    hr = ifeLang.GetPhonetic(item, 1, -1, out var yomigana);
+                    if (hr != 0)
+                    {
+                        throw Marshal.GetExceptionForHR(hr);
+                    }
 
+                    if (string.IsNullOrWhiteSpace(item))
+                    {
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Origin:" + item);
+                        Console.WriteLine("Kana:" + yomigana);
+                        var ganaSpace = "";
+                        foreach (var word in yomigana) ganaSpace += word + " ";
+                        Console.WriteLine("Romaji:" + WanaKana.ToRomaji(hepburnConverter, ganaSpace));
+                        kanaStrings.Add(yomigana);
+                        romajiStrings.Add(WanaKana.ToRomaji(hepburnConverter, ganaSpace));
+                    }
+                }
+
+                File.AppendAllLines("kana.txt",kanaStrings);
+                File.AppendAllLines("romaji.txt", romajiStrings);
+
+                Console.WriteLine("----------------");
+                Console.WriteLine("Done!");
                 Console.ReadLine();
             }
             catch (COMException ex)

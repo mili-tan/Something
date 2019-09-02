@@ -20,21 +20,14 @@ namespace KanjiTest
             {
                 var ifeLang = Activator.CreateInstance(Type.GetTypeFromProgID("MSIME.Japan")) as IFELanguage;
                 int hr = ifeLang.Open();
-                if (hr != 0)
-                    throw Marshal.GetExceptionForHR(hr);
+                if (hr != 0) throw Marshal.GetExceptionForHR(hr);
 
                 foreach (var item in words)
                 {
                     hr = ifeLang.GetPhonetic(item, 1, -1, out var yomigana);
-                    if (hr != 0)
-                    {
-                        throw Marshal.GetExceptionForHR(hr);
-                    }
+                    if (hr != 0) throw Marshal.GetExceptionForHR(hr);
 
-                    if (string.IsNullOrWhiteSpace(item))
-                    {
-                        Console.WriteLine();
-                    }
+                    if (string.IsNullOrWhiteSpace(item)) Console.WriteLine();
                     else
                     {
                         Console.WriteLine("Origin:" + item);
@@ -42,6 +35,7 @@ namespace KanjiTest
                         var ganaSpace = "";
                         foreach (var word in yomigana) ganaSpace += word + " ";
                         Console.WriteLine("Romaji:" + WanaKana.ToRomaji(hepburnConverter, ganaSpace));
+
                         kanaStrings.Add(yomigana);
                         romajiStrings.Add(WanaKana.ToRomaji(hepburnConverter, ganaSpace));
                     }

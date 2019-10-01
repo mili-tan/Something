@@ -1,0 +1,5 @@
+aws lightsail get-static-ips
+aws lightsail get-static-ip --static-ip-name {ipname}
+aws lightsail release-static-ip --static-ip-name {ipname}
+aws lightsail allocate-static-ip --static-ip-name {ipname}
+aws lightsail attach-static-ip --static-ip-name {ipname}

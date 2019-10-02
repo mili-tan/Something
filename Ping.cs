@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace mCopernicus.EasyChecker
 {
-    static class Ping
+    static class MPing
     {
         public static List<int> Tcping(string ip,int port)
         {
@@ -45,7 +45,7 @@ namespace mCopernicus.EasyChecker
             return times;
         }
 
-        public static List<int> MPing(string ipStr)
+        public static List<int> Ping(string ipStr)
         {
             System.Net.NetworkInformation.Ping ping = new System.Net.NetworkInformation.Ping();
             byte[] bufferBytes = Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwabcdefghi");

@@ -5,19 +5,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace EasyChecker
+namespace mCopernicus.EasyChecker
 {
     static class Ping
     {
         public static List<int> Tcping(string ip,int port)
         {
             var times = new List<int>();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 2; i++)
             {
                 Socket socks = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                {
-                    Blocking = true
-                };
+                    {Blocking = true, ReceiveTimeout = 6000, SendTimeout = 6000};
 
                 IPEndPoint point;
                 try
@@ -28,10 +26,7 @@ namespace EasyChecker
                 {
                     point = new IPEndPoint(Dns.GetHostAddresses(ip)[0], port);
                 }
-
-
                 Stopwatch stopWatch = new Stopwatch();
-
                 stopWatch.Start();
                 try
                 {
@@ -39,16 +34,12 @@ namespace EasyChecker
                 }
                 catch
                 {
-                    times.Add(0);
-                    return times;
+                    //times.Add(0);
                 }
                 stopWatch.Stop();
-
-                double time = stopWatch.Elapsed.TotalMilliseconds;
-                times.Add(Convert.ToInt32(time));
+                times.Add(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
                 socks.Close();
-
-                Thread.Sleep(100);
+                Thread.Sleep(50);
             }
 
             return times;
@@ -60,10 +51,10 @@ namespace EasyChecker
             byte[] bufferBytes = { 00, 01, 00, 01, 00, 01, 00, 01 };
 
             var times = new List<int>();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 2; i++)
             {
                 times.Add(Convert.ToInt32(ping.Send(ipStr, 50, bufferBytes).RoundtripTime));
-                Thread.Sleep(100);
+                Thread.Sleep(50);
             }
 
             return times;

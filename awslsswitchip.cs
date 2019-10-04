@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using mCopernicus.EasyChecker;
 using Newtonsoft.Json;
@@ -12,7 +11,9 @@ namespace LightsailSwitchIp
 {
     static class Program
     {
-        static void Main(string[] args)
+        public static string modStr = "-m awscli lightsail ";
+
+        static void Main()
         {
             foreach (var item in File.ReadAllLines("svr.txt"))
             {
@@ -21,7 +22,6 @@ namespace LightsailSwitchIp
                 var region = svr[1];
                 var ddns = svr[2];
 
-                var modStr = "-m awscli lightsail ";
                 var p = new Process
                 {
                     StartInfo = new ProcessStartInfo("python")
@@ -55,53 +55,8 @@ namespace LightsailSwitchIp
                         Console.WriteLine("Inaccessible:" + jMsgOip.staticIp.ipAddress);
                         Console.WriteLine("Switching IP...");
 
-                        using (var pStart = new Process
-                        {
-                            StartInfo = new ProcessStartInfo("python")
-                            {
-                                Arguments =
-                                    modStr +
-                                    $"release-static-ip --static-ip-name {jMsgOip.staticIp.name} --region={region}"
-                            }
-                        })
-                        {
-                            pStart.Start();
-                            pStart.WaitForExit();
-                        }
-
-                        Console.WriteLine("release static ip");
-
-                        using (var pStart = new Process
-                        {
-                            StartInfo = new ProcessStartInfo("python")
-                            {
-                                Arguments =
-                                    modStr +
-                                    $"allocate-static-ip --static-ip-name {jMsgOip.staticIp.name} --region={region}"
-                            }
-                        })
-                        {
-                            pStart.Start();
-                            pStart.WaitForExit();
-                        }
-
-                        Console.WriteLine("allocate static ip");
-
-                        using (var pStart = new Process
-                        {
-                            StartInfo = new ProcessStartInfo("python")
-                            {
-                                Arguments = modStr + $"attach-static-ip --static-ip-name {jMsgOip.staticIp.name}" +
-                                            $" --instance-name {jMsgOip.staticIp.attachedTo} --region={region}"
-                            }
-                        })
-                        {
-                            pStart.Start();
-                            pStart.WaitForExit();
-                        }
-
-                        Console.WriteLine("attached");
-
+                        Switchip(jMsgOip.staticIp.name.ToString(), region, jMsgOip.staticIp.isAttached.ToString());
+                        Thread.Sleep(500);
                         p.Start();
                         p.WaitForExit();
                         jMsgOip = JsonConvert.DeserializeObject<dynamic>(p.StandardOutput.ReadToEnd());
@@ -143,6 +98,73 @@ namespace LightsailSwitchIp
                 Thread.Sleep(1000);
                 Console.Clear();
             }
+        }
+
+        public static void Switchip(string ipName, string regionName, string attachedTo)
+        {
+            using (var pStart = new Process
+            {
+                StartInfo = new ProcessStartInfo("python")
+                {
+                    Arguments =
+                        modStr +
+                        $"release-static-ip --static-ip-name {ipName} --region={regionName}"
+                }
+            })
+            {
+                pStart.Start();
+                pStart.WaitForExit();
+            }
+
+            Console.WriteLine("release static ip");
+
+            using (var pStart = new Process
+            {
+                StartInfo = new ProcessStartInfo("python")
+                {
+                    Arguments =
+                        modStr +
+                        $"allocate-static-ip --static-ip-name {ipName} --region={regionName}"
+                }
+            })
+            {
+                pStart.Start();
+                pStart.WaitForExit();
+            }
+
+            Console.WriteLine("allocate static ip");
+
+            using (var pStart = new Process
+            {
+                StartInfo = new ProcessStartInfo("python")
+                {
+                    Arguments = modStr + $"attach-static-ip --static-ip-name {ipName}" +
+                                $" --instance-name {attachedTo} --region={regionName}"
+                }
+            })
+            {
+                pStart.Start();
+                pStart.WaitForExit();
+            }
+
+            Console.WriteLine("attached");
+
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo("python")
+                {
+                    Arguments = modStr + "get-static-ip --static-ip-name={ipName} --region={region}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            p.Start();
+            p.WaitForExit();
+            var jMsgOip = JsonConvert.DeserializeObject<dynamic>(p.StandardOutput.ReadToEnd());
+            List<int> pingInts = MPing.Ping(jMsgOip.staticIp.ipAddress.ToString());
+            List<int> tcPingInts = MPing.Tcping(jMsgOip.staticIp.ipAddress.ToString(), 22);
+            if (pingInts.Max() == 0 || tcPingInts.Max() == 0) Switchip(ipName, regionName, attachedTo);
         }
     }
 }

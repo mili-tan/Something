@@ -73,7 +73,7 @@ namespace LitchiGetSyllabus
                 {
                     var item = itemLine.Split(',');
                     var img = WebSnapshotsHelper.GetWebSiteThumbnail($"http://{IP}/studentportal.php/" +
-                                                                     $"Jxxx/xskbxx/optype/2/xn/{yr1.Text}-{yr2.Text}/xq/{semester.Text}/dqz/{week.Text}/" +
+                                                                     $"Jxxx/xskbxx/optype/2/xn/{year1.Text}-{year2.Text}/xq/{semester.Text}/dqz/{week.Text}/" +
                                                                      $"sybmdmstr/{item[0]}/bjmc/{item[1]}"
                         , 1200, 600, 1200, 600);
 

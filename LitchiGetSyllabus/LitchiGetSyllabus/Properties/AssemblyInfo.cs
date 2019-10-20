@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("LitchiGetSyllabus")]
-[assembly: AssemblyCopyright("Copyright © Youxuan Tan 2019")]
+[assembly: AssemblyCopyright("Copyright © Milkey 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

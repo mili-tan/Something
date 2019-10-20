@@ -30,13 +30,13 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.semester = new System.Windows.Forms.NumericUpDown();
             this.week = new System.Windows.Forms.NumericUpDown();
-            this.yr2 = new System.Windows.Forms.NumericUpDown();
-            this.yr1 = new System.Windows.Forms.NumericUpDown();
+            this.year2 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.year1 = new System.Windows.Forms.NumericUpDown();
             this.panel1 = new System.Windows.Forms.Panel();
             this.MakeTransparent = new System.Windows.Forms.CheckBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
@@ -44,8 +44,8 @@
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.semester)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.week)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yr2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yr1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.year2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.year1)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,7 +72,7 @@
             this.tableLayoutPanel1.Controls.Add(this.label2, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.semester, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.week, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.yr2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.year2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.label1, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(129, -3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -82,6 +82,24 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(248, 112);
             this.tableLayoutPanel1.TabIndex = 2;
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.Location = new System.Drawing.Point(127, 81);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(118, 23);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "周";
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.Location = new System.Drawing.Point(127, 44);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(118, 23);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "学期";
             // 
             // semester
             // 
@@ -129,37 +147,20 @@
             0,
             0});
             // 
-            // yr2
+            // year2
             // 
-            this.yr2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.yr2.Location = new System.Drawing.Point(3, 5);
-            this.yr2.Maximum = new decimal(new int[] {
+            this.year2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.year2.Location = new System.Drawing.Point(3, 5);
+            this.year2.Maximum = new decimal(new int[] {
             3000,
             0,
             0,
             0});
-            this.yr2.Name = "yr2";
-            this.yr2.Size = new System.Drawing.Size(118, 27);
-            this.yr2.TabIndex = 2;
-            this.yr2.Value = new decimal(new int[] {
+            this.year2.Name = "year2";
+            this.year2.Size = new System.Drawing.Size(118, 27);
+            this.year2.TabIndex = 2;
+            this.year2.Value = new decimal(new int[] {
             2020,
-            0,
-            0,
-            0});
-            // 
-            // yr1
-            // 
-            this.yr1.Location = new System.Drawing.Point(3, 3);
-            this.yr1.Maximum = new decimal(new int[] {
-            3000,
-            0,
-            0,
-            0});
-            this.yr1.Name = "yr1";
-            this.yr1.Size = new System.Drawing.Size(123, 27);
-            this.yr1.TabIndex = 3;
-            this.yr1.Value = new decimal(new int[] {
-            2019,
             0,
             0,
             0});
@@ -173,27 +174,26 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "学年";
             // 
-            // label2
+            // year1
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.Location = new System.Drawing.Point(127, 44);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(118, 23);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "学期";
-            // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.Location = new System.Drawing.Point(127, 81);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(118, 23);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "周";
+            this.year1.Location = new System.Drawing.Point(3, 3);
+            this.year1.Maximum = new decimal(new int[] {
+            3000,
+            0,
+            0,
+            0});
+            this.year1.Name = "year1";
+            this.year1.Size = new System.Drawing.Size(123, 27);
+            this.year1.TabIndex = 3;
+            this.year1.Value = new decimal(new int[] {
+            2019,
+            0,
+            0,
+            0});
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.yr1);
+            this.panel1.Controls.Add(this.year1);
             this.panel1.Controls.Add(this.tableLayoutPanel1);
             this.panel1.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.panel1.Location = new System.Drawing.Point(45, 44);
@@ -244,8 +244,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.semester)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.week)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yr2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yr1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.year2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.year1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -259,9 +259,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown semester;
         private System.Windows.Forms.NumericUpDown week;
-        private System.Windows.Forms.NumericUpDown yr2;
+        private System.Windows.Forms.NumericUpDown year2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown yr1;
+        private System.Windows.Forms.NumericUpDown year1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.CheckBox MakeTransparent;
         private System.Windows.Forms.ListBox listBox1;

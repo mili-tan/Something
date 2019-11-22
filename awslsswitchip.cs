@@ -15,10 +15,7 @@ namespace LightsailSwitchIp
 
         static void Main()
         {
-            if (!File.Exists("./log.log"))
-            {
-                File.Create("./log.log").Close();
-            }
+            if (!File.Exists("./log.log")) File.Create("./log.log").Close();
 
             foreach (var item in File.ReadAllLines("svr.txt"))
             {

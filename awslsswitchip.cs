@@ -15,9 +15,14 @@ namespace LightsailSwitchIp
 
         static void Main()
         {
+            if (!File.Exists("./log.log"))
+            {
+                File.Create("./log.log").Close();
+            }
+
             foreach (var item in File.ReadAllLines("svr.txt"))
             {
-                var svr = item.Split(",");
+                var svr = item.Split(',');
                 var ipName = svr[0];
                 var region = svr[1];
                 var ddns = svr[2];
@@ -26,7 +31,9 @@ namespace LightsailSwitchIp
                 {
                     StartInfo = new ProcessStartInfo("python")
                     {
-                        Arguments = "-m awscli", UseShellExecute = false, RedirectStandardOutput = true,
+                        Arguments = "-m awscli",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
                         CreateNoWindow = true
                     }
                 };
@@ -54,6 +61,8 @@ namespace LightsailSwitchIp
                         Console.Clear();
                         Console.WriteLine("Inaccessible:" + jMsgOip.staticIp.ipAddress);
                         Console.WriteLine("Switching IP...");
+                        File.WriteAllText("./log.log",
+                            File.ReadAllText("./log.log") + DateTime.Now + ":Accessible " + jMsgOip.staticIp.ipAddress + Environment.NewLine);
 
                         Switchip(jMsgOip.staticIp.name.ToString(), region, jMsgOip.staticIp.isAttached.ToString());
                         Thread.Sleep(500);
@@ -64,22 +73,26 @@ namespace LightsailSwitchIp
                         using (var pStart = new Process
                         {
                             StartInfo = new ProcessStartInfo("curl")
-                                { Arguments = ddns.Replace("0.0.0.0", jMsgOip.staticIp.ipAddress.ToString()) }
+                            { Arguments = ddns.Replace("0.0.0.0", jMsgOip.staticIp.ipAddress.ToString()) }
                         })
                         {
                             pStart.Start();
                             pStart.WaitForExit();
                         }
                         Console.WriteLine("OK");
+                        File.WriteAllText("./log.log",
+                            File.ReadAllText("./log.log") + DateTime.Now + ":Accessible " + jMsgOip.staticIp.ipAddress + Environment.NewLine);
                     }
                     else
                     {
+                        File.WriteAllText("./log.log",
+                            File.ReadAllText("./log.log") + DateTime.Now + ":Accessible " + jMsgOip.staticIp.ipAddress + Environment.NewLine);
                         Console.WriteLine("Accessible");
                         Console.WriteLine();
                         using (var pStart = new Process
                         {
                             StartInfo = new ProcessStartInfo("curl")
-                                {Arguments = ddns.Replace("0.0.0.0", jMsgOip.staticIp.ipAddress.ToString())}
+                            { Arguments = ddns.Replace("0.0.0.0", jMsgOip.staticIp.ipAddress.ToString()) }
                         })
                         {
                             pStart.Start();

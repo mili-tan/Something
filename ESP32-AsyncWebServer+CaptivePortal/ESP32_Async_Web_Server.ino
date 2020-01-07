@@ -24,7 +24,7 @@ String processor(const String& var) {
     else {
       ledState = "OFF";
     }
-    Serial.print(ledState);
+    Serial.println(ledState);
     return ledState;
   }
   return String();
@@ -80,6 +80,18 @@ void setup() {
 //  });
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+    int paramsNum = request->params();
+    for(int i=0;i<paramsNum;i++){
+          
+        AsyncWebParameter* p = request->getParam(i);
+        Serial.println("------");
+        Serial.print("Param name: ");
+        Serial.println(p->name());
+        Serial.print("Param value: ");
+        Serial.println(p->value());
+        Serial.println("------");
+    }
+    
     request->send(SPIFFS, "/index.html", String(), false, processor);
   });
 

@@ -14,7 +14,9 @@ namespace DNS8484
         static void Main()
         {
             var dnsQMsg = new DnsMessage();
-            dnsQMsg.Questions.Add(new DnsQuestion(DomainName.Parse("google.com"), RecordType.A, RecordClass.Any));
+            dnsQMsg.Questions.Add(new DnsQuestion(DomainName.Parse("pixiv.net"), RecordType.A, RecordClass.Any));
+            dnsQMsg.IsEDnsEnabled = true;
+            dnsQMsg.EDnsOptions.Options.Add(new ClientSubnetOption(24, IPAddress.Parse("0.0.0.0")));
             //dnsQMsg.Encode(false, out var bytes);
 
             var args = new object[] {false, null};

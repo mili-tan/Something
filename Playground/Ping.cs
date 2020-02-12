@@ -12,11 +12,10 @@ namespace mCopernicus.EasyChecker
         public static List<int> Tcping(string ip,int port)
         {
             var times = new List<int>();
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 Socket socks = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                    {Blocking = true, ReceiveTimeout = 6000, SendTimeout = 6000};
-
+                    { Blocking = true, ReceiveTimeout = 1000, SendTimeout = 1000 };
                 IPEndPoint point;
                 try
                 {
@@ -30,18 +29,19 @@ namespace mCopernicus.EasyChecker
                 stopWatch.Start();
                 try
                 {
-                    socks.Connect(point);
+                    var result = socks.BeginConnect(point, null, null);
+                    if (!result.AsyncWaitHandle.WaitOne(1500, true)) continue;
                 }
                 catch
                 {
-                    //times.Add(0);
+                    continue;
                 }
                 stopWatch.Stop();
                 times.Add(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
                 socks.Close();
                 Thread.Sleep(50);
             }
-
+            if (times.Count == 0) times.Add(0);
             return times;
         }
 
@@ -51,12 +51,36 @@ namespace mCopernicus.EasyChecker
             byte[] bufferBytes = Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwabcdefghi");
 
             var times = new List<int>();
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
-                times.Add(Convert.ToInt32(ping.Send(ipStr, 50, bufferBytes).RoundtripTime));
+                times.Add(Convert.ToInt32(ping.Send(ipStr, 120, bufferBytes).RoundtripTime));
                 Thread.Sleep(50);
             }
 
+            return times;
+        }
+
+        public static List<int> Curl(string urlStr)
+        {
+            var webClient = new MyCurl.MWebClient() { TimeOut = 1000 };
+            var times = new List<int>();
+            for (int i = 0; i < 4; i++)
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                try
+                {
+                    webClient.DownloadString(urlStr);
+                }
+                catch
+                {
+                    continue;
+                }
+                stopWatch.Stop();
+                times.Add(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
+                Thread.Sleep(50);
+            }
+            if (times.Count == 0) times.Add(0);
             return times;
         }
     }

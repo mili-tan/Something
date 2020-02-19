@@ -4,8 +4,10 @@ const nonblocked_region = ['CN', 'HK', 'TW', 'SG', 'MY']
 const blocked_ip_address = ['0.0.0.0', '127.0.0.1']
  
 const replace_dict = {
-    '$upstream': '$custom_domain',
-    '//cloudflare-ipfs.com': ''
+    '$upstream' : '$custom_domain',
+    '//cloudflare-ipfs.com' : '',
+    '//ipfs.io' : '',
+    'ipfs://' : '/ipfs/'
 }
  
 addEventListener('fetch', event => {
@@ -14,7 +16,7 @@ addEventListener('fetch', event => {
   if (req.url.indexOf('/ipfs/') >= 0) {
     event.respondWith(fetchAndApply(event.request));
   } else {
-    event.respondWith(new Response(`hello world`));
+    event.respondWith(new Response(`Welcome to Wayback IPFS Gateway`));
   }
 })
  

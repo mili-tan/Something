@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Numerics;
+using System.Threading;
+using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 
 namespace ether
@@ -7,7 +10,7 @@ namespace ether
     {
         static void Main(string[] args)
         {
-            var w3 = new Web3("https://mainnet.infura.io/v3/d05f5fc29e5543a1bce5d336c0815c6e");
+            var w3 = new Web3("https://cloudflare-eth.com");
             var balance = w3.Eth.GetBalance.SendRequestAsync("0xd3cc440b8adba63f2d25fea900fc16f434a6700c").Result;
             Console.WriteLine($"Balance in Wei: {balance.Value}");
             var etherAmount = Web3.Convert.FromWei(balance.Value);
@@ -19,9 +22,35 @@ namespace ether
             Console.WriteLine("To " + transaction.To);
             Console.WriteLine("Val " + Web3.Convert.FromWei(transaction.Value.Value));
             Console.WriteLine("InputText " + transaction.Input);
-            //var iRequest = w3.Eth.Filters.NewFilter.SendRequestAsync(new NewFilterInput()
+
+            BigInteger integerBlockNumber = BigInteger.Zero; 
+            while (true)
+            {
+                if (w3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result.Value != integerBlockNumber)
+                {
+                    var blockWithTransactions = w3.Eth.Blocks.GetBlockWithTransactionsByNumber
+                        .SendRequestAsync(BlockParameter.CreateLatest()).Result;
+                    integerBlockNumber = blockWithTransactions.Number.Value;
+                    foreach (var itemTransaction in blockWithTransactions.Transactions)
+                    {
+                        Console.WriteLine(blockWithTransactions.Number + " - " + itemTransaction.TransactionIndex +
+                                          " / " + blockWithTransactions.Transactions.Length);
+                        Console.WriteLine("-----------------------------");
+                        Console.WriteLine("TransactionHash " + itemTransaction.TransactionHash);
+                        Console.WriteLine("From " + itemTransaction.From);
+                        Console.WriteLine("To " + itemTransaction.To);
+                        Console.WriteLine("Val " + Web3.Convert.FromWei(itemTransaction.Value.Value));
+                        //Console.WriteLine("InputText " + itemTransaction.Input);
+                        Console.WriteLine("-----------------------------");
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }
+
+            //var iRequest = w3.Eth.Filters.NewBlockFilter.SendRequestAsync(new NewFilterInput()
             //{
-            //    Address = new[] {"0xd3cc440b8adba63f2d25fea900fc16f434a6700c"},
+            //    Address = new[] { "0xd3cc440b8adba63f2d25fea900fc16f434a6700c" },
             //    FromBlock = BlockParameter.CreateEarliest(),
             //    ToBlock = BlockParameter.CreateLatest()
             //}).Result;

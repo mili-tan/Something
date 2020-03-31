@@ -40,7 +40,7 @@ namespace UWApi
             //MessageBox.Show(Encoding.UTF8.GetString(decryptedData));
             //this.Close();
 
-            var totp = new Totp(Base32Encoding.ToBytes("2LKNGZKXQCDHKDHJ"));
+            var totp = new Totp(Base32Encoding.ToBytes(""));
             MessageBox.Show(totp.ComputeTotp(DateTime.UtcNow));
             Clipboard.SetText(totp.ComputeTotp(DateTime.UtcNow));
             this.Close();

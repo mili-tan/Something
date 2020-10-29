@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
 using OpenCvSharp;
@@ -18,14 +18,30 @@ namespace mOpenCV.CarplateWPF
         {
             InitializeComponent();
 
-            Mat src = new Mat(@"./carp2.jpg");
-            src = src.Resize(new Size(src.Width / 2, src.Height / 2));
+            Mat src = new Mat(@"./desktop.jpg");
             Cv2.ImShow("src", src);
+            //src = src.Resize(new Size(src.Width / 2, src.Height / 2));
+            for (var y = 0; y < src.Height; y++)
+            {
+                for (var x = 0; x < src.Width; x++)
+                {
+                    var color = src.Get<Vec3b>(y, x);
+                    //if (color.Item2 < 175)
+                    if (color.Item2 < 225)
+                    {
+                        color.Item0 = 255;
+                        color.Item1 = 0;
+                        color.Item2 = 0;
+                    }
+                    src.Set(y, x, color);
+                }
+            }
+            Cv2.ImShow("fade", src);
             Mat gray = new Mat();
             Mat binary = new Mat();
             Cv2.CvtColor(src, gray, ColorConversionCodes.RGB2GRAY);
-            gray = gray.Blur(new Size(5, 5));
             gray = gray.GaussianBlur(new Size(5, 5), 0);
+            gray = gray.Blur(new Size(5, 5));
             gray = gray.BoxFilter(-1, new Size(10, 10), normalize: true);
             Cv2.ImShow("gray", gray);
             Cv2.Threshold(gray, binary, 100, 255, ThresholdTypes.Otsu | ThresholdTypes.Binary);
@@ -53,6 +69,7 @@ namespace mOpenCV.CarplateWPF
                 Point2f[] pot = new Point2f[4];//新建点集合接收点集合
 
                 //for (int i = 0; i < rotateRect.Length; i++)
+                //{
                 var angle = rotateRect[i].Angle;//矩形角度
                 pot = rotateRect[i].Points();//矩形的4个角
                 var line1 = Math.Sqrt((pot[0].X - pot[1].X) * (pot[0].X - pot[1].X) + (pot[0].Y - pot[1].Y) * (pot[0].Y - pot[1].Y));

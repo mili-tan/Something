@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using OpenCvSharp;
 using Size = OpenCvSharp.Size;
@@ -13,7 +12,7 @@ namespace mOpenCV.TrafficLight
         {
             Console.WriteLine("Hello World!");
 
-            Mat src = new Mat(@"./Y.jpg");
+            Mat src = new Mat(@"./G.jpg");
             src = src.Resize(new Size(src.Width / 4, src.Height / 4));
             Cv2.ImShow("src", src);
             var sp = new Stopwatch();
@@ -24,8 +23,8 @@ namespace mOpenCV.TrafficLight
 
             Mat m1 = new Mat();
             Cv2.MedianBlur(h1, m1, 11); //  ksize必须大于1且是奇数
-            m1 = ReplaceMatColor(m1, Color.Yellow);
-            m1 = m1.GaussianBlur(new Size(11, 11), 0);
+            m1 = ReplaceMatColor(m1, Scalar.Green);
+            m1 = m1.GaussianBlur(new Size(33, 33), 0);
             Cv2.ImShow("Blur Decolor", m1);
             Mat m2 = new Mat();
             Cv2.CvtColor(m1, m2, ColorConversionCodes.BGR2GRAY);
@@ -48,7 +47,7 @@ namespace mOpenCV.TrafficLight
                  *      8:maxRadius: 最大半径
                  * 
                  */
-            CircleSegment[] cs = Cv2.HoughCircles(m2, HoughMethods.Gradient, 1, 80, 60, 30, 20, 50);
+            CircleSegment[] cs = Cv2.HoughCircles(m2, HoughMethods.Gradient, 1, 80, 50, 30, 20, 50);
             Console.WriteLine("FoundCircle:" + cs.Length);
             var dst = src;
             for (int i = 0; i < cs.Count(); i++)
@@ -80,7 +79,7 @@ namespace mOpenCV.TrafficLight
             return h1.CvtColor(ColorConversionCodes.HSV2RGB);
         }
 
-        public static Mat ReplaceMatColor(Mat m1, Color targetColor)
+        public static Mat ReplaceMatColor(Mat m1, Scalar targetColor)
         {
             for (var y = 0; y < m1.Height; y++)
             {
@@ -89,11 +88,11 @@ namespace mOpenCV.TrafficLight
                     var color = m1.Get<Vec3b>(y, x);
                     //BGR
                     bool b = false;
-                    if (targetColor == Color.Red)
+                    if (targetColor == Scalar.Red)
                         b = (color.Item2 == 255 && color.Item1 < 100 && color.Item0 == 0); //for R
-                    else if (targetColor == Color.Green)
+                    else if (targetColor == Scalar.Green)
                         b = (color.Item1 > 100 && color.Item1 == 255 && color.Item2 == 0); //for G;
-                    else if (targetColor == Color.Yellow)
+                    else if (targetColor == Scalar.Yellow)
                         b = (color.Item2 == 255 && color.Item1 > 100 && color.Item0 == 0); //for Y
 
                     if (b)

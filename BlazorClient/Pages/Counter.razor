@@ -1,0 +1,18 @@
+﻿@page "/get"
+
+<h1>GET</h1>
+
+<p>@currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private string currentCount = "none";
+
+    private async Task IncrementCount()
+    {
+        currentCount = await new HttpClient().GetStringAsync("//");
+        //StateHasChanged(); //或将void改成Task
+    }
+
+}

@@ -1,0 +1,16 @@
+﻿@page "/"
+@using Texnomic.Blazor.hCaptcha
+@using Texnomic.Blazor.hCaptcha.Enums
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+<HCaptcha Callback="hCaptchaCallback" Theme="Theme.Light"></HCaptcha>
+
+@code
+{
+    private bool IsCaptchaValid { get; set; }
+    protected void hCaptchaCallback(bool Result) => IsCaptchaValid = Result;
+}

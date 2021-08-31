@@ -11,6 +11,8 @@ Welcome to your new app.
 
 @code
 {
-    private bool IsCaptchaValid { get; set; }
-    protected void hCaptchaCallback(bool Result) => IsCaptchaValid = Result;
+    protected async void hCaptchaCallback(bool Result)
+    {
+        await Js.InvokeVoidAsync("alert", Result);
+    }
 }

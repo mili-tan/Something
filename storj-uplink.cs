@@ -29,17 +29,14 @@ namespace UpLinkTest
                         bytesToUpload, false).Result
                     .StartUploadAsync().GetAwaiter().GetResult();
             }
-
-            var listObjectsOptions = new ListObjectsOptions
+            var objectList = objectService.ListObjectsAsync(bucket, new ListObjectsOptions
             {
-                Prefix = "test/"
-            };
-
-            var objectList = objectService.ListObjectsAsync(bucket, listObjectsOptions).Result;
+                Prefix = "test-time/", Recursive = true, System = true
+            }).Result;
 
             foreach (var item in objectList.Items)
             {
-                Console.WriteLine(item.Key);
+                Console.WriteLine(item.Key + ":" + item.SystemMetadata.Created);
             }
         }
     }

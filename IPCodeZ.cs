@@ -13,9 +13,9 @@ namespace Milkey
 
         public static IPAddress FromHexToIp(string ipHex)
         {
-            var sList = new List<string>();
-            for (var i = 0; i < ipHex.Length; i += 2) sList.Add(ipHex.Substring(i, 2));
-            return new IPAddress(sList.Select(b => byte.Parse(b, NumberStyles.HexNumber)).ToArray());
+            var list = new List<string>();
+            for (var i = 0; i < ipHex.Length; i += 2) list.Add(ipHex.Substring(i, 2));
+            return new IPAddress(list.Select(x => byte.Parse(x, NumberStyles.HexNumber)).ToArray());
         }
 
         //public static string ToBase32String(IPAddress ipAddress)

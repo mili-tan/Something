@@ -1,10 +1,22 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 
 namespace Milkey
 {
-    internal class IPZCode
+    internal class IPCodeZ
     {
+        public static string ToEmojiString(IPAddress ipAddress)
+        {
+            var strs = string.Empty;
+            foreach (var b in ipAddress.GetAddressBytes())
+            {
+                var mouse = "🐀".ToCharArray();
+                mouse[1] = (char) (mouse[1] + b);
+                strs += mouse[0] + "" + mouse[1];
+            }
+            return strs;
+        }
+
         public static string ToHexString(IPAddress ipAddress)
         {
             return new string(BitConverter.ToString(ipAddress.GetAddressBytes())
@@ -16,6 +28,14 @@ namespace Milkey
             var list = new List<string>();
             for (var i = 0; i < ipHex.Length; i += 2) list.Add(ipHex.Substring(i, 2));
             return new IPAddress(list.Select(x => byte.Parse(x, NumberStyles.HexNumber)).ToArray());
+        }
+
+        public static IPAddress FromEmojiToIp(string ipEmoji)
+        {
+            var list = new List<byte>();
+            var bytes = ipEmoji.ToCharArray().Select(x => (byte) x).ToArray();
+            for (var i = 1; i < bytes.Length; i += 2) list.Add(bytes[i]);
+            return new IPAddress(list.ToArray());
         }
 
         //public static string ToBase32String(IPAddress ipAddress)

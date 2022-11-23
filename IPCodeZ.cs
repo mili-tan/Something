@@ -32,10 +32,13 @@ namespace Milkey
 
         public static IPAddress FromEmojiToIp(string ipEmoji)
         {
-            var list = new List<byte>();
-            var bytes = ipEmoji.ToCharArray().Select(x => (byte) x).ToArray();
-            for (var i = 1; i < bytes.Length; i += 2) list.Add(bytes[i]);
-            return new IPAddress(list.ToArray());
+            return new IPAddress(FromEmojiToIpBytes(ipEmoji).ToArray());
+        }
+
+        private static IEnumerable<byte> FromEmojiToIpBytes(string ipEmoji)
+        {
+            var bytes = ipEmoji.ToCharArray().Select(x => (byte)x).ToArray();
+            for (var i = 1; i < bytes.Length; i += 2) yield return bytes[i];
         }
 
         //public static string ToBase32String(IPAddress ipAddress)

@@ -14,22 +14,19 @@ namespace mVectorSear
                 ApiUrlFormat = "https://openai.api2d.net/{0}/{1}",
             };
 
-            SentenceList = JsonSerializer.Deserialize<Dictionary<string, double[]>>(File.ReadAllText("test.json")) ?? new Dictionary<string, double[]>();
+            SentenceList = JsonSerializer.Deserialize<Dictionary<string, double[]>>(File.ReadAllText("test.json")) ??
+                           new Dictionary<string, double[]>();
 
             Console.WriteLine("请输入：");
 
-            var inputFloats = api.Embeddings.GetEmbeddingsAsync(Console.ReadLine()).Result;
-            var similarities = new Dictionary<string, double>();
-
-            foreach (var item in SentenceList)
-            {
-                var inputFloatsDoubles = Array.ConvertAll(inputFloats, x => (double)x);
-                similarities.Add(item.Key, new CosineSimilarity().GetSimilarityScore(inputFloatsDoubles, item.Value));
-            }
+            var inputDoubles = Array.ConvertAll(api.Embeddings.GetEmbeddingsAsync(Console.ReadLine()).Result,
+                x => (double) x);
+            var similarities = SentenceList.ToDictionary(item => item.Key,
+                item => new CosineSimilarity().GetSimilarityScore(inputDoubles, item.Value));
 
             similarities = similarities.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
 
-            foreach (var item in similarities.TakeLast(10))
+            foreach (var item in similarities.TakeLast(10).Reverse())
             {
                 Console.WriteLine(item.Key + ":" + item.Value);
             }

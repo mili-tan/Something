@@ -5,7 +5,7 @@ namespace mVectorSear
 {
     internal class Program
     {
-        public static Dictionary<string, double[]> SentenceList = new();
+        public static Dictionary<string, double[]> SentenceDictionary = new();
 
         static void Main(string[] args)
         {
@@ -14,19 +14,17 @@ namespace mVectorSear
                 ApiUrlFormat = "https://openai.api2d.net/{0}/{1}",
             };
 
-            SentenceList = JsonSerializer.Deserialize<Dictionary<string, double[]>>(File.ReadAllText("test.json")) ??
-                           new Dictionary<string, double[]>();
+            SentenceDictionary = JsonSerializer.Deserialize<Dictionary<string, double[]>>(File.ReadAllText("test.json")) ??
+                                 new Dictionary<string, double[]>();
 
             Console.WriteLine("请输入：");
 
-            var inputDoubles = Array.ConvertAll(api.Embeddings.GetEmbeddingsAsync(Console.ReadLine()).Result,
-                x => (double) x);
-            var similarities = SentenceList.ToDictionary(item => item.Key,
-                item => new CosineSimilarity().GetSimilarityScore(inputDoubles, item.Value));
+            var similarities = new Dictionary<string, double>();
 
-            similarities = similarities.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            var inputDoubles = Array.ConvertAll(api.Embeddings.GetEmbeddingsAsync(Console.ReadLine()).Result, x => (double) x);
+            foreach (var pair in SentenceDictionary) similarities.Add(pair.Key, new CosineSimilarity().GetSimilarityScore(inputDoubles, pair.Value));
 
-            foreach (var item in similarities.TakeLast(10).Reverse())
+            foreach (var item in similarities.OrderBy(x => x.Value).TakeLast(10).Reverse())
             {
                 Console.WriteLine(item.Key + ":" + item.Value);
             }

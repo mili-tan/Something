@@ -11,7 +11,8 @@ namespace LemonLicenses
                 "JustTest", 1).msg);
         }
 
-        public static (bool ok, int days, string msg) LicensesActivate(string licenseKey, string instanceName, int productId)
+        public static (bool ok, string msg, int days, string instanceId) LemonLicensesActivate(string licenseKey,
+            string instanceName, int productId)
         {
             using var httpClient = new HttpClient();
             using var request = new HttpRequestMessage(new HttpMethod("POST"),
@@ -32,16 +33,17 @@ namespace LemonLicenses
                 if (activatedToken.ToObject<bool>())
                 {
                     if (jObject["meta"]!["product_id"]!.ToObject<int>() != productId)
-                        return (false, 0, "the product is not sold by us");
+                        return (false, "the product is not sold by us", 0, string.Empty);
 
                     var expiresDays = (jObject["license_key"]!["expires_at"]!.ToObject<DateTime>() - DateTime.Today)
                         .Days + 1;
-                    return (true, expiresDays, "ok");
+                    var instanceId = jObject["instance"]!["id"]!.ToString();
+                    return (true, "ok", expiresDays, instanceId);
                 }
                 else if (jObject.TryGetValue("error", out var errorToken))
-                    return (false, 0, errorToken.ToString());
+                    return (false, errorToken.ToString(), 0, string.Empty);
 
-            return (false, 0, "license activation failed");
+            return (false, "license activation failed", 0, string.Empty);
         }
     }
 }

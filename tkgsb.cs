@@ -82,6 +82,69 @@ namespace TenKGSB
                 return result;
             });
 
+            
+            app.MapGet("/r", async (HttpContext httpContext, IHttpClientFactory clientFactory) =>
+            {
+                var client = clientFactory.CreateClient("R");
+                var name = httpContext.Request.Query["name"];
+                var res = false;
+                var accountId = "";
+                var readKey = "";
+                var writeKey = "";
+
+                if (MemoryCache.Default.Contains("R:" + name))
+                    return (bool) MemoryCache.Default.Get("R:" + name);
+
+                using var hostRequest = new HttpRequestMessage(new HttpMethod("GET"),
+                    $"https://api.cloudflare.com/client/v4/accounts/{accountId}/urlscanner/scan?page_hostname=" +
+                    name);
+                hostRequest.Headers.TryAddWithoutValidation("Authorization", "Bearer " + readKey);
+                var hostJson = JObject.Parse(await (await client.SendAsync(hostRequest)).Content.ReadAsStringAsync());
+
+                if (hostJson["result"]["tasks"].Any())
+                {
+                    var reportId =
+                        (hostJson["result"]["tasks"].FirstOrDefault(i =>
+                            i["url"].ToString() == $"https://{name}/" || i["url"].ToString() == $"http://{name}/") ??
+                        hostJson["result"]["tasks"].FirstOrDefault())["uuid"].ToString();
+
+                    using var reportRequest = new HttpRequestMessage(new HttpMethod("GET"), $"https://api.cloudflare.com/client/v4/accounts/{accountId}/urlscanner/scan/" + reportId);
+                    hostRequest.Headers.TryAddWithoutValidation("Authorization", "Bearer " + readKey);
+                    var reportJson = JObject.Parse(await (await client.SendAsync(reportRequest)).Content.ReadAsStringAsync());
+
+                    if (reportJson["success"].ToObject<bool>()) return res;
+                    var b = reportJson["result"]["scan"]["verdicts"]["overall"]["malicious"];
+                    if (!b.HasValues) b = reportJson["result"]["scan"]["meta"]["phishing"];
+                    res = Convert.ToBoolean(b);
+                    Task.Run(() =>
+                    {
+                        if (!MemoryCache.Default.Contains("R:" + name))
+                            MemoryCache.Default.Add(
+                                new CacheItem("R:" + name, res),
+                                new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(24) });
+                    });
+                }
+                else
+                {
+                    using var newScanRequest = new HttpRequestMessage(new HttpMethod("POST"), $"https://api.cloudflare.com/client/v4/accounts/{accountId}/urlscanner/scan");
+                    newScanRequest.Headers.TryAddWithoutValidation("Authorization", "Bearer " + writeKey);
+                    newScanRequest.Content = new StringContent($"{{\"url\": \"{name}\"}}");
+                    newScanRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                    await client.SendAsync(newScanRequest);
+
+                    Task.Run(() =>
+                    {
+                        if (!MemoryCache.Default.Contains("R:" + name))
+                            MemoryCache.Default.Add(
+                                new CacheItem("R:" + name, false),
+                                new CacheItemPolicy {AbsoluteExpiration = DateTimeOffset.Now.AddHours(1)});
+                    });
+                }
+
+                return res;
+            });
+
+
             app.Run();
         }
 

@@ -1,5 +1,3 @@
-﻿using System;
-using System.IO;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,8 +19,8 @@ namespace OnePageSev
                 .ConfigureKestrel(options =>
                 {
                     options.Limits.MaxRequestBodySize = 1024;
-                    options.Listen(new IPEndPoint(IPAddress.Loopback, 2800),
-                        listenOptions => listenOptions.Protocols = HttpProtocols.Http1AndHttp2);
+                    options.Listen(new IPEndPoint(IPAddress.Loopback, args.Any()?int.Parse(args.First()) : 2800),
+                        listenOptions => listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3);;
                 })
                 .Configure(app =>
                 {
@@ -36,13 +34,7 @@ namespace OnePageSev
                             context.Response.ContentType = "text/html";
                             await context.Response.WriteAsync(file);
                         });
-                        endpoints.Map("/{any}", async context =>
-                        {
-                            context.Response.Headers.Add("X-Powered-By", "DreamLayer.OnePage");
-                            context.Response.ContentType = "text/html";
-                            await context.Response.WriteAsync(file);
-                        });
-                        endpoints.Map("/{any}/{sth}", async context =>
+                        endpoints.Map("/{**any}", async context =>
                         {
                             context.Response.Headers.Add("X-Powered-By", "DreamLayer.OnePage");
                             context.Response.ContentType = "text/html";

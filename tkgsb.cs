@@ -32,10 +32,8 @@ namespace TenKGSB
                 httpClient.DefaultRequestHeaders.Add("X-Forwarded-For", "192.168.1.100");
                 httpClient.DefaultRequestHeaders.Add("Referer", "https://.../");
 
-                var fullUrl = "https://.../index.php?m=check&a=check&url=" + name;
-                var results = await (await httpClient.PostAsync(fullUrl, null)).Content.ReadAsStringAsync();
-
-                var json = results.Substring(1, results.Length - 2);
+                var fullUrl = "https://.../index.php?m=url&a=validUrl&url=http://" + name;
+                var json =  (await (await httpClient.PostAsync(fullUrl, null)).Content.ReadAsStringAsync()).Trim();
 
                 Task.Run(() =>
                 {
@@ -180,3 +178,4 @@ namespace TenKGSB
         }
     }
 }
+

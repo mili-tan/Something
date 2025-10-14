@@ -12,7 +12,7 @@ namespace AutoLetsEncryptDnsChallenge
         static async Task Main(string[] args)
         {
             const string domain = "*.dns-01.example.com"; // 替换为您的域名
-            const string email = "YOUR-EMAIL"; // 替换为您的电子邮件地址
+            const string email = "YOUR-EMAIL@EXMAPLE.COM"; // 替换为您的电子邮件地址
             const string apiToken = "YOUR-CLOUDFLARE-API-TOKEN"; // 替换为您的 Cloudflare API 令牌
             const string zoneId = "YOUR-CLOUDFLARE-ZONE-ID"; // 替换为您的 Cloudflare 区域 ID
 
@@ -20,10 +20,8 @@ namespace AutoLetsEncryptDnsChallenge
             {
                 Console.WriteLine($"开始为域名 {domain} 申请通配符证书...");
 
-                var acme = new AcmeContext(WellKnownServers.LetsEncryptV2);
-
-                Console.WriteLine("创建ACME账户...");
-                var account = await acme.NewAccount(email, true);
+                Console.WriteLine("获取ACME账户...");
+                var (acme, account) = await GetOrCreateAcmeAccount(email);
 
                 Console.WriteLine("创建证书订单...");
                 var order = await acme.NewOrder([domain]);
@@ -73,22 +71,21 @@ namespace AutoLetsEncryptDnsChallenge
                     Console.WriteLine("等待验证完成...");
                     var challengeStatus = await WaitForValidation(dnsChallenge);
 
-                    string pemCert, pemKey;
-
                     if (challengeStatus == ChallengeStatus.Valid)
                     {
                         Console.WriteLine("DNS验证成功！");
                         var certKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
-
                         var csr = new CsrInfo
                         {
                             CommonName = domain,
                         };
+                        string pemCert, pemKey;
+
                         try
                         {
                             Console.WriteLine("生成证书...");
-
                             var orderFinalize = await order.Finalize(csr, certKey);
+
                             for (int i = 0; i < 30; i++)
                             {
                                 if (orderFinalize.Status == OrderStatus.Ready) break;
@@ -99,10 +96,8 @@ namespace AutoLetsEncryptDnsChallenge
                             }
 
                             var cert = await order.Download();
-
                             pemCert = cert.ToPem();
                             pemKey = certKey.ToPem();
-
                             Console.WriteLine($"域名 {domain} 证书申请成功");
                         }
                         catch (Exception e)
@@ -149,6 +144,48 @@ namespace AutoLetsEncryptDnsChallenge
                 Console.WriteLine($"发生错误: {ex.Message}");
                 Console.WriteLine($"详细错误: {ex}");
             }
+        }
+
+        /// <summary>
+        /// 获取或创建ACME账户
+        /// </summary>
+        private static async Task<(AcmeContext acme, IAccountContext account)> GetOrCreateAcmeAccount(string email)
+        {
+            // 根据邮箱生成账户密钥文件名
+            var accountKeyFileName =
+                $"acme_account_{email.Replace("@", "_at_")}.pem";
+
+            try
+            {
+                // 尝试加载已存在的账户密钥
+                if (File.Exists(accountKeyFileName))
+                {
+                    Console.WriteLine($"找到已存在的账户密钥文件: {accountKeyFileName}");
+                    var accountKeyPem = await File.ReadAllTextAsync(accountKeyFileName);
+                    var accountKey = KeyFactory.FromPem(accountKeyPem);
+                    var acme = new AcmeContext(WellKnownServers.LetsEncryptV2, accountKey);
+                    var account = await acme.Account();
+
+                    Console.WriteLine($"成功加载现有ACME账户: {email}");
+                    return (acme, account);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"加载现有账户密钥失败，将创建新账户: {ex.Message}");
+            }
+
+            // 创建新账户
+            Console.WriteLine($"创建新的ACME账户: {email}");
+            var newAcme = new AcmeContext(WellKnownServers.LetsEncryptV2);
+            var newAccount = await newAcme.NewAccount(email, true);
+
+            // 保存账户密钥
+            var newAccountKeyPem = newAcme.AccountKey.ToPem();
+            await File.WriteAllTextAsync(accountKeyFileName, newAccountKeyPem);
+            Console.WriteLine($"新账户密钥已保存到: {accountKeyFileName}");
+
+            return (newAcme, newAccount);
         }
 
         private static async Task<ChallengeStatus?> WaitForValidation(IChallengeContext challenge, int maxRetries = 30)

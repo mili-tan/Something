@@ -1,6 +1,6 @@
-using Certes;
-using Certes.Acme;
-using Certes.Acme.Resource;
+using Certify.ACME.Anvil;
+using Certify.ACME.Anvil.Acme;
+using Certify.ACME.Anvil.Acme.Resource;
 using CloudFlare.Client;
 using CloudFlare.Client.Api.Zones.DnsRecord;
 using CloudFlare.Client.Enumerators;
@@ -73,21 +73,51 @@ namespace AutoLetsEncryptDnsChallenge
                     Console.WriteLine("等待验证完成...");
                     var challengeStatus = await WaitForValidation(dnsChallenge);
 
+                    string pemCert, pemKey;
+
                     if (challengeStatus == ChallengeStatus.Valid)
                     {
                         Console.WriteLine("DNS验证成功！");
                         var certKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
-                        Console.WriteLine("生成证书...");
-                        var cert = await order.Generate(
-                            new CsrInfo
-                            {
-                                CommonName = domain,
-                            },
-                            certKey);
 
-                        // 获取PEM格式的证书
-                        var pemCert = cert.ToPem();
-                        var pemKey = certKey.ToPem();
+                        var csr = new CsrInfo
+                        {
+                            CommonName = domain,
+                        };
+                        try
+                        {
+                            Console.WriteLine("生成证书...");
+
+                            var orderFinalize = await order.Finalize(csr, certKey);
+                            for (int i = 0; i < 30; i++)
+                            {
+                                if (orderFinalize.Status == OrderStatus.Ready) break;
+                                Thread.Sleep(1000);
+                                var odrStatus = order.Resource().Result.Status;
+                                Console.WriteLine(odrStatus);
+                                if (odrStatus is OrderStatus.Ready or OrderStatus.Valid) break;
+                            }
+
+                            var cert = await order.Download();
+
+                            pemCert = cert.ToPem();
+                            pemKey = certKey.ToPem();
+
+                            Console.WriteLine($"域名 {domain} 证书申请成功");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            Thread.Sleep(3000);
+
+                            Console.WriteLine("下载证书...");
+                            var cert = await order.Download();
+
+                            pemCert = cert.ToPem();
+                            pemKey = certKey.ToPem();
+
+                            Console.WriteLine($"域名 {domain} 证书申请成功");
+                        }
 
                         Console.WriteLine("\n=== 证书申请成功 ===");
                         Console.WriteLine("证书内容:");

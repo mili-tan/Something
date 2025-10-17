@@ -147,6 +147,48 @@ namespace AutoLetsEncryptDnsChallenge
         }
 
         /// <summary>
+        /// 使用私钥吊销证书
+        /// </summary>
+        /// <param name="certificatePem">证书PEM内容</param>
+        /// <param name="privateKeyPem">私钥PEM内容</param>
+        /// <param name="reason">吊销原因（可选）</param>
+        /// <returns>是否吊销成功</returns>
+        public static async Task<bool> RevokeCertificateWithPrivateKey(AcmeContext acme, string certificatePem, string privateKeyPem, RevocationReason reason = RevocationReason.Unspecified)
+        {
+            try
+            {
+                Console.WriteLine($"开始吊销证书，原因: {reason}"); ;
+
+                // 从PEM加载证书私钥
+                var certKey = KeyFactory.FromPem(privateKeyPem);
+
+                // 吊销证书
+                Console.WriteLine("正在向Let's Encrypt提交吊销请求...");
+                await acme.RevokeCertificate(PemToDer(certificatePem), reason, KeyFactory.FromPem(privateKeyPem));
+
+                Console.WriteLine("✓ 证书吊销成功");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"✗ 证书吊销失败: {ex}");
+                return false;
+            }
+        }
+
+        // 证书 PEM -> DER
+        public static byte[] PemToDer(string pem)
+        {
+            const string header = "-----BEGIN CERTIFICATE-----";
+            const string footer = "-----END CERTIFICATE-----";
+            var start = pem.IndexOf(header, StringComparison.Ordinal);
+            var end = pem.IndexOf(footer, StringComparison.Ordinal);
+            if (start < 0 || end < 0) throw new ArgumentException("Invalid certificate PEM");
+            var base64 = pem.Substring(start + header.Length, end - (start + header.Length)).Replace("\n", "").Replace("\r", "");
+            return Convert.FromBase64String(base64);
+        }
+
+        /// <summary>
         /// 获取或创建ACME账户
         /// </summary>
         private static async Task<(AcmeContext acme, IAccountContext account)> GetOrCreateAcmeAccount(string email)

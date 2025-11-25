@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice EVO HTML</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-active {
+            background-color: #10b981;
+        }
+        
+        .status-inactive {
+            background-color: #ef4444;
+        }
+        
+        .status-pending {
+            background-color: #f59e0b;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-block {
+            background-color: #f7f7f7;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .error-message {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #c33;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .tab {
+            overflow: hidden;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 16px;
+            transition: 0.3s;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab button:hover {
+            background-color: #f9fafb;
+        }
+        
+        .tab button.active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .tabcontent {
+            display: none;
+            padding: 12px 0;
+            animation: fadeEffect 0.5s;
+        }
+        
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        .copy-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .copy-btn.copied {
+            background-color: #10b981 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-cloud text-blue-500 text-2xl"></i>
+                    <h1 class="text-xl font-bold text-gray-800">Alice EVO HTML</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="userInfo" class="hidden">
+                        <span class="text-gray-700" id="username"></span>
+                        <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full" id="userCredit"></span>
+                    </div>
+                    <button id="loginBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                        <i class="fas fa-key mr-2"></i>设置凭证
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 凭证设置模态框 -->
+        <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">设置API凭证</h2>
+                    <button id="closeAuthModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4">请输入您的API凭证信息</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="clientId">
+                            Client ID
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                               id="clientId" type="text" placeholder="cli_xxxxxxxxxxxxx" >
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="clientSecret">
+                            Client Secret
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                               id="clientSecret" type="password" placeholder="输入您的Client Secret" >
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button id="cancelAuth" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md transition-colors">
+                            取消
+                        </button>
+                        <button id="saveAuth" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors">
+                            保存凭证
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实例操作区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <!-- 侧边栏 -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- 用户信息卡片 -->
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">用户信息</h3>
+                    <div id="userProfile" class="text-gray-600">
+                        <p>请先设置API凭证</p>
+                    </div>
+                </div>
+                
+                <!-- 快速操作 -->
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">快速操作</h3>
+                    <div class="space-y-2">
+                        <button id="refreshBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center">
+                            <i class="fas fa-sync-alt mr-2"></i>刷新实例列表
+                        </button>
+                        <button id="createInstanceBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>创建新实例
+                        </button>
+                        <button id="clearAllHistoryBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center">
+                            <i class="fas fa-trash mr-2"></i>清空命令历史
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- SSH密钥管理 -->
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">SSH密钥</h3>
+                    <div id="sshKeysList" class="text-gray-600">
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主内容区域 -->
+            <div class="lg:col-span-3">
+                <!-- 实例列表 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">虚拟机实例</h2>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <input type="text" id="searchInstance" placeholder="搜索实例..." class="border rounded-md py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="instancesList" class="space-y-4">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-server text-4xl mb-4"></i>
+                            <p>暂无实例，点击上方按钮创建新实例</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建实例模态框 -->
+    <div id="createInstanceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold text-gray-800">创建新实例</h2>
+            </div>
+            <div class="p-6">
+                <form id="createInstanceForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="planSelect">
+                                实例规格
+                            </label>
+                            <select id="planSelect" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline">
+                                <option value="">加载中...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="osSelect">
+                                操作系统
+                            </label>
+                            <select id="osSelect" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline">
+                                <option value="">请先选择实例规格</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="duration">
+                                使用时长 (小时)
+                            </label>
+                            <input id="duration" type="number" min="1" max="999" value="24" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="sshKeySelect">
+                                SSH密钥 (可选)
+                            </label>
+                            <select id="sshKeySelect" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline">
+                                <option value="">不使用SSH密钥</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="bootScript">
+                            启动脚本 (可选)
+                        </label>
+                        <textarea id="bootScript" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="输入启动脚本内容"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">启动脚本将在实例首次启动时自动执行</p>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" id="cancelCreate" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md transition-colors">
+                            取消
+                        </button>
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors flex items-center">
+                            <i class="fas fa-plus mr-2"></i>创建实例
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 实例详情模态框 -->
+    <div id="instanceDetailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800" id="instanceDetailTitle">实例详情</h2>
+                    <button id="closeInstanceDetail" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="tab">
+                    <button class="tablinks active" onclick="openTab(event, 'instanceInfo')">实例信息</button>
+                    <button class="tablinks" onclick="openTab(event, 'commandHistory')">命令历史</button>
+                </div>
+                
+                <div id="instanceInfo" class="tabcontent" style="display: block;">
+                    <div id="instanceDetailContent">
+                        <!-- 实例详情内容将在这里动态生成 -->
+                    </div>
+                </div>
+                
+                <div id="commandHistory" class="tabcontent">
+                    <div id="commandHistoryContent">
+                        <div class="mb-4">
+                            <h3 class="font-semibold text-lg mb-2">执行新命令</h3>
+                            <div class="flex space-x-2 mb-4">
+                                <input type="text" id="newCommand" placeholder="输入要执行的命令" class="flex-grow shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <button id="executeNewCommand" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors">
+                                    执行
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg">命令历史</h3>
+                            <button id="clearInstanceHistory" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm transition-colors">
+                                <i class="fas fa-trash mr-1"></i>清空此实例历史
+                            </button>
+                        </div>
+                        <div id="commandHistoryList" class="space-y-2">
+                            <!-- 命令历史记录将在这里显示 -->
+                            <p class="text-gray-500">暂无命令历史记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 电源操作下拉菜单 -->
+    <div id="powerDropdown" class="dropdown-content hidden absolute bg-white shadow-lg rounded-md z-50">
+        <a class="power-option" data-action="boot">启动</a>
+        <a class="power-option" data-action="shutdown">关机</a>
+        <a class="power-option" data-action="restart">重启</a>
+        <a class="power-option" data-action="poweroff">强制关机</a>
+    </div>
+
+    <!-- 重装系统模态框 -->
+    <div id="rebuildModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">重装系统</h2>
+                <button id="closeRebuildModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="rebuildOsSelect">
+                        选择操作系统
+                    </label>
+                    <select id="rebuildOsSelect" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="rebuildBootScript">
+                        启动脚本 (可选)
+                    </label>
+                    <textarea id="rebuildBootScript" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="输入启动脚本内容，系统将自动进行Base64编码"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button id="cancelRebuild" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md transition-colors">
+                        取消
+                    </button>
+                    <button id="confirmRebuild" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md transition-colors">
+                        确认重装
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 命令执行结果模态框 -->
+    <div id="commandResultModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800">命令执行结果</h2>
+                    <button id="closeCommandResult" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="commandResultContent">
+                    <!-- 命令执行结果将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let authToken = null;
+        let instances = [];
+        let plans = [];
+        let sshKeys = [];
+        let selectedInstance = null;
+        let commandHistory = {}; // 存储命令历史 {instanceId: [{command, uid, timestamp, result, status}]}
+        let powerDropdownVisible = false;
+        let currentPowerInstanceId = null;
+
+        // DOM 元素
+        const authModal = document.getElementById('authModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const closeAuthModal = document.getElementById('closeAuthModal');
+        const cancelAuth = document.getElementById('cancelAuth');
+        const saveAuth = document.getElementById('saveAuth');
+        const clientIdInput = document.getElementById('clientId');
+        const clientSecretInput = document.getElementById('clientSecret');
+        const userInfo = document.getElementById('userInfo');
+        const usernameSpan = document.getElementById('username');
+        const userCreditSpan = document.getElementById('userCredit');
+        const userProfile = document.getElementById('userProfile');
+        const sshKeysList = document.getElementById('sshKeysList');
+        const instancesList = document.getElementById('instancesList');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const createInstanceBtn = document.getElementById('createInstanceBtn');
+        const clearAllHistoryBtn = document.getElementById('clearAllHistoryBtn');
+        const createInstanceModal = document.getElementById('createInstanceModal');
+        const cancelCreate = document.getElementById('cancelCreate');
+        const createInstanceForm = document.getElementById('createInstanceForm');
+        const planSelect = document.getElementById('planSelect');
+        const osSelect = document.getElementById('osSelect');
+        const sshKeySelect = document.getElementById('sshKeySelect');
+        const instanceDetailModal = document.getElementById('instanceDetailModal');
+        const closeInstanceDetail = document.getElementById('closeInstanceDetail');
+        const instanceDetailContent = document.getElementById('instanceDetailContent');
+        const commandResultModal = document.getElementById('commandResultModal');
+        const closeCommandResult = document.getElementById('closeCommandResult');
+        const commandResultContent = document.getElementById('commandResultContent');
+        const powerDropdown = document.getElementById('powerDropdown');
+        const rebuildModal = document.getElementById('rebuildModal');
+        const closeRebuildModal = document.getElementById('closeRebuildModal');
+        const cancelRebuild = document.getElementById('cancelRebuild');
+        const confirmRebuild = document.getElementById('confirmRebuild');
+        const rebuildOsSelect = document.getElementById('rebuildOsSelect');
+        const newCommand = document.getElementById('newCommand');
+        const executeNewCommand = document.getElementById('executeNewCommand');
+        const commandHistoryList = document.getElementById('commandHistoryList');
+        const clearInstanceHistory = document.getElementById('clearInstanceHistory');
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查本地存储中是否有凭证
+            const savedClientId = localStorage.getItem('alice_client_id');
+            const savedClientSecret = localStorage.getItem('alice_client_secret');
+            
+            if (savedClientId && savedClientSecret) {
+                clientIdInput.value = savedClientId;
+                clientSecretInput.value = savedClientSecret;
+                generateToken();
+            } else {
+                // 显示凭证设置模态框
+                authModal.classList.remove('hidden');
+            }
+            
+            // 绑定事件
+            loginBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
+            closeAuthModal.addEventListener('click', () => authModal.classList.add('hidden'));
+            cancelAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+            saveAuth.addEventListener('click', saveCredentials);
+            refreshBtn.addEventListener('click', refreshInstances);
+            createInstanceBtn.addEventListener('click', () => createInstanceModal.classList.remove('hidden'));
+            clearAllHistoryBtn.addEventListener('click', clearAllCommandHistory);
+            cancelCreate.addEventListener('click', () => createInstanceModal.classList.add('hidden'));
+            closeInstanceDetail.addEventListener('click', () => instanceDetailModal.classList.add('hidden'));
+            closeCommandResult.addEventListener('click', () => commandResultModal.classList.add('hidden'));
+            closeRebuildModal.addEventListener('click', () => rebuildModal.classList.add('hidden'));
+            cancelRebuild.addEventListener('click', () => rebuildModal.classList.add('hidden'));
+            
+            createInstanceForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                deployInstance();
+            });
+            
+            planSelect.addEventListener('change', function() {
+                const planId = this.value;
+                if (planId) {
+                    loadOSImages(planId);
+                }
+            });
+            
+            // 电源操作下拉菜单
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.power-dropdown') && !e.target.closest('.dropdown-content')) {
+                    powerDropdown.classList.add('hidden');
+                    powerDropdownVisible = false;
+                }
+            });
+            
+            // 电源操作选项
+            document.querySelectorAll('.power-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    if (currentPowerInstanceId) {
+                        performPowerOperation(currentPowerInstanceId, action);
+                    }
+                    powerDropdown.classList.add('hidden');
+                    powerDropdownVisible = false;
+                });
+            });
+            
+            // 重装系统确认
+            confirmRebuild.addEventListener('click', function() {
+                const instanceId = this.getAttribute('data-instance-id');
+                if (instanceId) {
+                    rebuildInstance(instanceId);
+                }
+            });
+            
+            // 执行新命令
+            executeNewCommand.addEventListener('click', function() {
+                const instanceId = selectedInstance ? selectedInstance.id : null;
+                if (instanceId && newCommand.value.trim()) {
+                    executeCommand(instanceId, newCommand.value.trim());
+                    newCommand.value = '';
+                }
+            });
+            
+            // 允许按回车执行命令
+            newCommand.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    executeNewCommand.click();
+                }
+            });
+            
+            // 清空当前实例历史
+            clearInstanceHistory.addEventListener('click', function() {
+                const instanceId = selectedInstance ? selectedInstance.id : null;
+                if (instanceId) {
+                    clearInstanceCommandHistory(instanceId);
+                }
+            });
+            
+            // 加载命令历史
+            loadCommandHistory();
+        });
+
+        // 标签页切换功能
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            const tablinks = document.getElementsByClassName("tablinks");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // 保存凭证
+        function saveCredentials() {
+            const clientId = clientIdInput.value.trim();
+            const clientSecret = clientSecretInput.value.trim();
+            
+            if (!clientId || !clientSecret) {
+                alert('请输入完整的Client ID和Secret');
+                return;
+            }
+            
+            localStorage.setItem('alice_client_id', clientId);
+            localStorage.setItem('alice_client_secret', clientSecret);
+            
+            generateToken();
+            authModal.classList.add('hidden');
+        }
+
+        // 生成认证Token
+        function generateToken() {
+            const clientId = localStorage.getItem('alice_client_id');
+            const clientSecret = localStorage.getItem('alice_client_secret');
+            
+            if (clientId && clientSecret) {
+                // 修正：Token格式为 "APIClientID:Secret"，不需要Base64编码
+                authToken = `${clientId}:${clientSecret}`;
+                loadInitialData();
+            }
+        }
+
+        // 加载初始数据
+        function loadInitialData() {
+            if (!authToken) return;
+            
+            // 加载用户信息
+            fetchUserProfile();
+            
+            // 加载SSH密钥
+            fetchSSHKeys();
+            
+            // 加载EVO计划
+            fetchEVOPlans();
+            
+            // 加载实例列表
+            fetchInstances();
+        }
+
+        // API调用函数
+        async function apiCall(url, options = {}) {
+            if (!authToken) {
+                alert('请先设置API凭证');
+                return null;
+            }
+            
+            const defaultOptions = {
+                headers: {
+                    // 修正：Authorization头格式为 "Bearer APIClientID:Secret"
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const finalOptions = { ...defaultOptions, ...options };
+            
+            try {
+                const response = await fetch(url, finalOptions);
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    return data.data;
+                } else {
+                    console.error('API错误:', data.message, 'URL:', url);
+                    throw new Error(`API错误 (${url}): ${data.message}`);
+                }
+            } catch (error) {
+                console.error('网络错误:', error);
+                // 如果是400错误且是SSH密钥接口，不抛出错误
+                if (url.includes('/ssh-keys') && error.message.includes('400')) {
+                    console.log('SSH密钥接口返回400，可能没有SSH密钥');
+                    return [];
+                }
+                throw error;
+            }
+        }
+
+        // 获取用户信息
+        async function fetchUserProfile() {
+            try {
+                const data = await apiCall('https://app.alice.ws/cli/v1/account/profile');
+                
+                if (data) {
+                    userInfo.classList.remove('hidden');
+                    usernameSpan.textContent = data.username;
+                    userCreditSpan.textContent = `积分: ${data.points}`;
+                    
+                    userProfile.innerHTML = `
+                        <p><strong>邮箱:</strong> ${data.email}</p>
+                        <p><strong>姓名:</strong> ${data.fullname}</p>
+                        <p><strong>积分:</strong> ${data.points}</p>
+                        <p><strong>余额:</strong> ${data.credit}</p>
+                        <p><strong>最大实例数:</strong> ${data.max_instances}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
+                showError('获取用户信息失败: ' + error.message);
+            }
+        }
+
+        // 获取SSH密钥
+        async function fetchSSHKeys() {
+            try {
+                const data = await apiCall('https://app.alice.ws/cli/v1/account/ssh-keys');
+                
+                if (data) {
+                    sshKeys = data;
+                    
+                    // 更新SSH密钥列表显示
+                    if (data.length > 0) {
+                        sshKeysList.innerHTML = '';
+                        data.forEach(key => {
+                            const keyElement = document.createElement('div');
+                            keyElement.className = 'mb-2 p-2 bg-gray-100 rounded';
+                            keyElement.innerHTML = `
+                                <p class="font-medium">${key.name}</p>
+                                <p class="text-xs text-gray-500 truncate">${key.publickey}</p>
+                            `;
+                            sshKeysList.appendChild(keyElement);
+                        });
+                    } else {
+                        sshKeysList.innerHTML = '<p class="text-gray-500">暂无SSH密钥</p>';
+                    }
+                    
+                    // 更新创建实例表单中的SSH密钥选项
+                    updateSSHKeyOptions();
+                }
+            } catch (error) {
+                console.error('获取SSH密钥失败:', error);
+                sshKeysList.innerHTML = '<p class="text-gray-500">暂无SSH密钥</p>';
+            }
+        }
+
+        // 获取EVO计划
+        async function fetchEVOPlans() {
+            try {
+                const data = await apiCall('https://app.alice.ws/cli/v1/evo/plans');
+                
+                if (data) {
+                    plans = data;
+                    
+                    // 更新计划选择下拉框
+                    planSelect.innerHTML = '<option value="">选择实例规格</option>';
+                    data.forEach(plan => {
+                        if (plan.status === 1) { // 只显示可用计划
+                            const option = document.createElement('option');
+                            option.value = plan.id;
+                            option.textContent = `${plan.name} (CPU: ${plan.cpu}, 内存: ${plan.memory/1024}GB, 硬盘: ${plan.disk}GB)`;
+                            planSelect.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('获取EVO计划失败:', error);
+                showError('获取EVO计划失败: ' + error.message);
+            }
+        }
+
+        // 获取操作系统镜像
+        async function loadOSImages(planId) {
+            try {
+                const data = await apiCall(`https://app.alice.ws/cli/v1/evo/plans/${planId}/os-images`);
+                
+                if (data) {
+                    osSelect.innerHTML = '<option value="">选择操作系统</option>';
+                    
+                    data.forEach(group => {
+                        const groupOption = document.createElement('optgroup');
+                        groupOption.label = group.group_name;
+                        
+                        group.os_list.forEach(os => {
+                            const option = document.createElement('option');
+                            option.value = os.id;
+                            option.textContent = os.name;
+                            groupOption.appendChild(option);
+                        });
+                        
+                        osSelect.appendChild(groupOption);
+                    });
+                }
+            } catch (error) {
+                console.error('获取操作系统镜像失败:', error);
+                showError('获取操作系统镜像失败: ' + error.message);
+            }
+        }
+
+        // 获取实例列表
+        async function fetchInstances() {
+            try {
+                const data = await apiCall('https://app.alice.ws/cli/v1/evo/instances');
+                
+                if (data) {
+                    instances = data;
+                    
+                    // 清理不存在的实例的命令历史
+                    cleanupCommandHistory();
+                    
+                    renderInstances();
+                }
+            } catch (error) {
+                console.error('获取实例列表失败:', error);
+                showError('获取实例列表失败: ' + error.message);
+            }
+        }
+
+        // 清理不存在的实例的命令历史
+        function cleanupCommandHistory() {
+            const instanceIds = instances.map(instance => instance.id.toString());
+            let hasChanges = false;
+            
+            // 遍历命令历史，删除不存在的实例的历史记录
+            for (const instanceId in commandHistory) {
+                if (!instanceIds.includes(instanceId)) {
+                    delete commandHistory[instanceId];
+                    hasChanges = true;
+                }
+            }
+            
+            // 如果有变化，保存到本地存储
+            if (hasChanges) {
+                saveCommandHistory();
+            }
+        }
+
+        // 渲染实例列表
+        function renderInstances() {
+            instancesList.innerHTML = '';
+            
+            if (instances.length === 0) {
+                instancesList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-server text-4xl mb-4"></i>
+                        <p>暂无实例，点击上方按钮创建新实例</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            instances.forEach(instance => {
+                const instanceCard = document.createElement('div');
+                instanceCard.className = 'bg-white border rounded-lg p-4 card';
+                instanceCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">${instance.hostname}</h3>
+                            <p class="text-sm text-gray-600">${instance.plan} | ${instance.os}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(instance.status)}">
+                                ${instance.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
+                        <div><strong>IP地址:</strong> ${instance.ipv4}</div>
+                        <div><strong>CPU:</strong> ${instance.cpu}核</div>
+                        <div><strong>内存:</strong> ${instance.memory/1024}GB</div>
+                        <div><strong>硬盘:</strong> ${instance.disk}GB</div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-4">
+                        <div><strong>创建时间:</strong> ${formatDate(instance.creation_at)}</div>
+                        <div><strong>到期时间:</strong> ${formatDate(instance.expiration_at)}</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="view-detail-btn bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm transition-colors" data-id="${instance.id}">
+                            详情
+                        </button>
+                        <div class="dropdown">
+                            <button class="power-dropdown-btn bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-sm transition-colors power-dropdown" data-id="${instance.id}">
+                                电源 <i class="fas fa-caret-down ml-1"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <a class="power-option" data-action="boot">启动</a>
+                                <a class="power-option" data-action="shutdown">关机</a>
+                                <a class="power-option" data-action="restart">重启</a>
+                                <a class="power-option" data-action="poweroff">强制关机</a>
+                            </div>
+                        </div>
+                        <button class="renew-btn bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm transition-colors" data-id="${instance.id}">
+                            续费
+                        </button>
+                        <button class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm transition-colors" data-id="${instance.id}">
+                            删除
+                        </button>
+                    </div>
+                `;
+                
+                instancesList.appendChild(instanceCard);
+            });
+            
+            // 绑定实例操作按钮事件
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const instanceId = this.getAttribute('data-id');
+                    showInstanceDetail(instanceId);
+                });
+            });
+            
+            document.querySelectorAll('.power-dropdown-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const instanceId = this.getAttribute('data-id');
+                    currentPowerInstanceId = instanceId;
+                    
+                    // 显示下拉菜单
+                    const dropdown = this.nextElementSibling;
+                    dropdown.classList.toggle('hidden');
+                });
+            });
+            
+            document.querySelectorAll('.power-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const action = this.getAttribute('data-action');
+                    if (currentPowerInstanceId) {
+                        performPowerOperation(currentPowerInstanceId, action);
+                    }
+                    this.closest('.dropdown-content').classList.add('hidden');
+                });
+            });
+            
+            document.querySelectorAll('.renew-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const instanceId = this.getAttribute('data-id');
+                    renewInstance(instanceId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const instanceId = this.getAttribute('data-id');
+                    deleteInstance(instanceId);
+                });
+            });
+        }
+
+        // 部署新实例
+        async function deployInstance() {
+            const productId = planSelect.value;
+            const osId = osSelect.value;
+            const time = document.getElementById('duration').value;
+            const sshKeyId = sshKeySelect.value || null;
+            const bootScript = document.getElementById('bootScript').value || null;
+            
+            if (!productId || !osId || !time) {
+                alert('请填写完整的实例信息');
+                return;
+            }
+            
+            try {
+                // 自动将启动脚本编码为Base64
+                const bootScriptEncoded = bootScript ? btoa(unescape(encodeURIComponent(bootScript))) : null;
+                
+                const requestBody = {
+                    product_id: parseInt(productId),
+                    os_id: parseInt(osId),
+                    time: parseInt(time),
+                    ssh_key_id: sshKeyId ? parseInt(sshKeyId) : null,
+                    boot_script: bootScriptEncoded
+                };
+                
+                const data = await apiCall('https://app.alice.ws/cli/v1/evo/instances/deploy', {
+                    method: 'POST',
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (data) {
+                    alert('实例创建成功！');
+                    createInstanceModal.classList.add('hidden');
+                    createInstanceForm.reset();
+                    fetchInstances();
+                }
+            } catch (error) {
+                console.error('创建实例失败:', error);
+                showError('创建实例失败: ' + error.message);
+            }
+        }
+
+        // 显示实例详情
+        async function showInstanceDetail(instanceId) {
+            const instance = instances.find(i => i.id == instanceId);
+            if (!instance) return;
+            
+            selectedInstance = instance;
+            
+            try {
+                // 获取实例状态
+                const stateData = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/state`);
+                
+                // 生成SSH连接命令
+                const sshCommand = generateSSHCommand(instance);
+                
+                instanceDetailContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-lg mb-2">基本信息</h3>
+                            <p><strong>主机名:</strong> ${instance.hostname}</p>
+                            <p><strong>实例ID:</strong> ${instance.id}</p>
+                            <p><strong>规格:</strong> ${instance.plan}</p>
+                            <p><strong>操作系统:</strong> ${instance.os}</p>
+                            <p><strong>状态:</strong> <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(instance.status)}">${instance.status}</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-lg mb-2">资源配置</h3>
+                            <p><strong>CPU:</strong> ${instance.cpu} 核 (${instance.cpu_name})</p>
+                            <p><strong>内存:</strong> ${instance.memory/1024} GB</p>
+                            <p><strong>硬盘:</strong> ${instance.disk} GB ${instance.disk_type}</p>
+                            <p><strong>网络:</strong> ${instance.show_speed}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-lg mb-2">网络信息</h3>
+                            <p><strong>IPv4:</strong> ${instance.ipv4}</p>
+                            <p><strong>IPv6:</strong> ${instance.ipv6}</p>
+                            <p><strong>SSH端口:</strong> 22</p>
+                            <p><strong>SSH用户:</strong> ${instance.user}</p>
+                            <p><strong>SSH密码:</strong> ${instance.password}</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-lg mb-2">时间信息</h3>
+                            <p><strong>创建时间:</strong> ${formatDate(instance.creation_at)}</p>
+                            <p><strong>到期时间:</strong> ${formatDate(instance.expiration_at)}</p>
+                            <p><strong>地区:</strong> ${instance.region}</p>
+                            <p><strong>路由:</strong> ${instance.routes}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-semibold text-lg mb-2">SSH连接</h3>
+                        <div class="mb-3">
+                            <p class="text-sm text-gray-600 mb-2">使用以下命令连接到您的实例：</p>
+                            <div class="flex space-x-2">
+                                <input type="text" id="sshCommandInput" readonly class="flex-grow code-block" value="${sshCommand}">
+                                <button id="copySshCommand" class="copy-btn bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p><strong>连接说明：</strong></p>
+                            <ul class="list-disc pl-5 mt-1">
+                                <li>使用密码登录：直接运行上述命令，然后输入密码</li>
+                                <li>使用密钥登录：将私钥保存到本地，然后运行：<code class="bg-gray-200 px-1 rounded">ssh -i /path/to/private/key ${instance.user}@${instance.ipv4}</code></li>
+                                <li>首次连接可能需要接受主机密钥</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    ${stateData ? `
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-semibold text-lg mb-2">实时状态</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">CPU使用率</p>
+                                <p class="text-2xl font-bold">${stateData.state ? stateData.state.cpu + '%' : 'N/A'}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">内存使用</p>
+                                <p class="text-2xl font-bold">${stateData.state && stateData.state.memory ? Math.round((stateData.state.memory.memtotal - stateData.state.memory.memavailable) / 1024) + 'MB' : 'N/A'}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">网络流量</p>
+                                <p class="text-2xl font-bold">${stateData.state && stateData.state.traffic ? Math.round(stateData.state.traffic.total / 1024) + 'KB' : 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-end space-x-2">
+                        <button id="rebuildInstance" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded transition-colors" data-instance-id="${instanceId}">
+                            重装系统
+                        </button>
+                    </div>
+                `;
+                
+                // 绑定操作按钮事件
+                document.getElementById('rebuildInstance').addEventListener('click', function() {
+                    const instanceId = this.getAttribute('data-instance-id');
+                    showRebuildModal(instanceId);
+                });
+                
+                // 绑定复制SSH命令按钮
+                document.getElementById('copySshCommand').addEventListener('click', function() {
+                    const sshCommandInput = document.getElementById('sshCommandInput');
+                    sshCommandInput.select();
+                    document.execCommand('copy');
+                    
+                    // 显示复制成功反馈
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                    this.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                });
+                
+                // 更新命令历史显示
+                updateCommandHistoryDisplay(instanceId);
+                
+                instanceDetailModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('获取实例详情失败:', error);
+                showError('获取实例详情失败: ' + error.message);
+            }
+        }
+
+        // 生成SSH连接命令
+        function generateSSHCommand(instance) {
+            return `ssh ${instance.user}@${instance.ipv4}`;
+        }
+
+        // 显示重装系统模态框
+        async function showRebuildModal(instanceId) {
+            const instance = instances.find(i => i.id == instanceId);
+            if (!instance) return;
+            
+            try {
+                // 获取可用的操作系统列表
+                const osImages = await apiCall(`https://app.alice.ws/cli/v1/evo/plans/${instance.plan_id}/os-images`);
+                
+                if (osImages) {
+                    rebuildOsSelect.innerHTML = '<option value="">选择操作系统</option>';
+                    
+                    osImages.forEach(group => {
+                        const groupOption = document.createElement('optgroup');
+                        groupOption.label = group.group_name;
+                        
+                        group.os_list.forEach(os => {
+                            const option = document.createElement('option');
+                            option.value = os.id;
+                            option.textContent = os.name;
+                            if (os.id === instance.os_id) {
+                                option.selected = true;
+                            }
+                            groupOption.appendChild(option);
+                        });
+                        
+                        rebuildOsSelect.appendChild(groupOption);
+                    });
+                    
+                    // 设置实例ID
+                    confirmRebuild.setAttribute('data-instance-id', instanceId);
+                    
+                    rebuildModal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('获取操作系统列表失败:', error);
+                showError('获取操作系统列表失败: ' + error.message);
+            }
+        }
+
+        // 执行电源操作
+        async function performPowerOperation(instanceId, action) {
+            try {
+                const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/power`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action })
+                });
+                
+                if (data) {
+                    alert('电源操作执行成功');
+                    fetchInstances();
+                }
+            } catch (error) {
+                console.error('执行电源操作失败:', error);
+                showError('执行电源操作失败: ' + error.message);
+            }
+        }
+
+        // 续费实例
+        async function renewInstance(instanceId) {
+            const hours = prompt('请输入续费时长(小时):', '1');
+            
+            if (hours && !isNaN(hours) && hours > 0) {
+                try {
+                    const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/renewals`, {
+                        method: 'POST',
+                        body: JSON.stringify({ time: parseInt(hours) })
+                    });
+                    
+                    if (data) {
+                        alert(`实例续费成功！新的到期时间: ${data.expiration_at}`);
+                        fetchInstances();
+                    }
+                } catch (error) {
+                    console.error('续费实例失败:', error);
+                    showError('续费实例失败: ' + error.message);
+                }
+            }
+        }
+
+        // 删除实例
+        async function deleteInstance(instanceId) {
+            if (confirm('确定要删除这个实例吗？此操作不可逆！')) {
+                try {
+                    const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (data) {
+                        // 删除实例对应的命令历史
+                        delete commandHistory[instanceId];
+                        saveCommandHistory();
+                        
+                        alert('实例删除成功');
+                        fetchInstances();
+                    }
+                } catch (error) {
+                    console.error('删除实例失败:', error);
+                    showError('删除实例失败: ' + error.message);
+                }
+            }
+        }
+
+        // 重装实例系统
+        async function rebuildInstance(instanceId) {
+            const osId = rebuildOsSelect.value;
+            const bootScript = document.getElementById('rebuildBootScript').value || null;
+            
+            if (!osId) {
+                alert('请选择操作系统');
+                return;
+            }
+            
+            try {
+                // 自动将启动脚本编码为Base64
+                const bootScriptEncoded = bootScript ? btoa(unescape(encodeURIComponent(bootScript))) : null;
+                
+                const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/rebuild`, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        os_id: parseInt(osId),
+                        boot_script: bootScriptEncoded
+                    })
+                });
+                
+                if (data) {
+                    alert('实例重装成功！新密码: ' + data.password);
+                    rebuildModal.classList.add('hidden');
+                    instanceDetailModal.classList.add('hidden');
+                    fetchInstances();
+                }
+            } catch (error) {
+                console.error('重装实例失败:', error);
+                showError('重装实例失败: ' + error.message);
+            }
+        }
+
+        // 执行命令
+        async function executeCommand(instanceId, command) {
+            try {
+                // 自动将命令编码为Base64
+                const commandEncoded = btoa(unescape(encodeURIComponent(command)));
+                
+                const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/exec`, {
+                    method: 'POST',
+                    body: JSON.stringify({ command: commandEncoded })
+                });
+                
+                if (data) {
+                    // 添加到命令历史
+                    addCommandToHistory(instanceId, {
+                        command: command,
+                        uid: data.command_uid,
+                        timestamp: new Date(),
+                        status: '已提交',
+                        result: null
+                    });
+                    
+                    alert(`命令已提交，命令UID: ${data.command_uid}`);
+                    
+                    // 更新命令历史显示
+                    updateCommandHistoryDisplay(instanceId);
+                }
+            } catch (error) {
+                console.error('执行命令失败:', error);
+                showError('执行命令失败: ' + error.message);
+            }
+        }
+
+        // 添加命令到历史记录
+        function addCommandToHistory(instanceId, commandData) {
+            if (!commandHistory[instanceId]) {
+                commandHistory[instanceId] = [];
+            }
+            
+            commandHistory[instanceId].unshift(commandData);
+            
+            // 保存到本地存储
+            saveCommandHistory();
+        }
+
+        // 加载命令历史
+        function loadCommandHistory() {
+            const savedHistory = localStorage.getItem('alice_command_history');
+            if (savedHistory) {
+                commandHistory = JSON.parse(savedHistory);
+            }
+        }
+
+        // 保存命令历史
+        function saveCommandHistory() {
+            localStorage.setItem('alice_command_history', JSON.stringify(commandHistory));
+        }
+
+        // 清空单个实例的命令历史
+        function clearInstanceCommandHistory(instanceId) {
+            if (confirm('确定要清空此实例的命令历史吗？此操作不可恢复！')) {
+                delete commandHistory[instanceId];
+                saveCommandHistory();
+                updateCommandHistoryDisplay(instanceId);
+                alert('实例命令历史已清空');
+            }
+        }
+
+        // 清空所有命令历史
+        function clearAllCommandHistory() {
+            if (confirm('确定要清空所有实例的命令历史吗？此操作不可恢复！')) {
+                commandHistory = {};
+                saveCommandHistory();
+                
+                // 如果当前有打开的实例详情，更新显示
+                if (selectedInstance) {
+                    updateCommandHistoryDisplay(selectedInstance.id);
+                }
+                
+                alert('所有命令历史已清空');
+            }
+        }
+
+        // 更新命令历史显示
+        function updateCommandHistoryDisplay(instanceId) {
+            if (!commandHistory[instanceId] || commandHistory[instanceId].length === 0) {
+                commandHistoryList.innerHTML = '<p class="text-gray-500">暂无命令历史记录</p>';
+                return;
+            }
+            
+            commandHistoryList.innerHTML = '';
+            
+            commandHistory[instanceId].forEach((cmd, index) => {
+                const cmdElement = document.createElement('div');
+                cmdElement.className = 'bg-gray-50 p-3 rounded-lg';
+                cmdElement.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-medium">${cmd.command}</p>
+                            <p class="text-xs text-gray-500">${formatDate(cmd.timestamp)} | UID: ${cmd.uid}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="px-2 py-1 rounded-full text-xs ${cmd.status === '已提交' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                ${cmd.status}
+                            </span>
+                            <button class="query-result-btn bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-xs transition-colors" data-instance-id="${instanceId}" data-uid="${cmd.uid}">
+                                查询结果
+                            </button>
+                        </div>
+                    </div>
+                    ${cmd.result ? `
+                    <div class="mt-2">
+                        <p class="text-sm font-medium">执行结果:</p>
+                        <div class="code-block max-h-32 overflow-y-auto mt-1">
+                            <pre class="text-xs">${cmd.result}</pre>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                commandHistoryList.appendChild(cmdElement);
+            });
+            
+            // 绑定查询结果按钮事件
+            document.querySelectorAll('.query-result-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const instanceId = this.getAttribute('data-instance-id');
+                    const commandUid = this.getAttribute('data-uid');
+                    getCommandResult(instanceId, commandUid);
+                });
+            });
+        }
+
+        // 获取命令执行结果
+        async function getCommandResult(instanceId, commandUid) {
+            try {
+                const data = await apiCall(`https://app.alice.ws/cli/v1/evo/instances/${instanceId}/exec/${commandUid}`);
+                
+                if (data) {
+                    let output = data.output;
+                    if (output) {
+                        try {
+                            output = atob(output);
+                        } catch (e) {
+                            // 如果解码失败，保持原样显示
+                        }
+                    }
+                    
+                    // 更新命令历史中的结果
+                    if (commandHistory[instanceId]) {
+                        const commandIndex = commandHistory[instanceId].findIndex(cmd => cmd.uid === commandUid);
+                        if (commandIndex !== -1) {
+                            commandHistory[instanceId][commandIndex].result = output;
+                            commandHistory[instanceId][commandIndex].status = '已完成';
+                            saveCommandHistory();
+                            
+                            // 更新显示
+                            updateCommandHistoryDisplay(instanceId);
+                        }
+                    }
+                    
+                    // 显示结果
+                    commandResultContent.innerHTML = `
+                        <div class="mb-4">
+                            <p><strong>命令状态:</strong> ${data.status}</p>
+                            <p><strong>执行结果:</strong> ${data.result}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold mb-2">命令输出:</p>
+                            <div class="code-block max-h-96 overflow-y-auto">
+                                <pre>${output || '无输出'}</pre>
+                            </div>
+                        </div>
+                    `;
+                    
+                    commandResultModal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('获取命令执行结果失败:', error);
+                showError('获取命令执行结果失败: ' + error.message);
+            }
+        }
+
+        // 刷新实例列表
+        function refreshInstances() {
+            fetchInstances();
+            alert('实例列表已刷新');
+        }
+
+        // 更新SSH密钥选项
+        function updateSSHKeyOptions() {
+            sshKeySelect.innerHTML = '<option value="">不使用SSH密钥</option>';
+            
+            sshKeys.forEach(key => {
+                const option = document.createElement('option');
+                option.value = key.id;
+                option.textContent = key.name;
+                sshKeySelect.appendChild(option);
+            });
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            // 创建一个错误提示元素
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message fixed top-4 right-4 z-50';
+            errorElement.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span>${message}</span>
+                    <button class="ml-4 text-red-700 hover:text-red-900" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(errorElement);
+            
+            // 5秒后自动移除错误提示
+            setTimeout(() => {
+                if (errorElement.parentElement) {
+                    errorElement.remove();
+                }
+            }, 5000);
+        }
+
+        // 工具函数
+        function getStatusClass(status) {
+            switch(status) {
+                case 'active': return 'status-active';
+                case 'inactive': return 'status-inactive';
+                default: return 'status-pending';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+    </script>
+</body>
+</html>

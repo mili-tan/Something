@@ -9,7 +9,7 @@ namespace OpFwder
         private readonly IPAddress upstreamDns;
         private readonly int upstreamPort = 53;
         private readonly DnsServer dnsServer;
-        private readonly ConcurrentDictionary<DnsQuestion, CacheEntry> cache = new();
+        private readonly ConcurrentDictionary<(DnsQuestion, IPAddress), CacheEntry> cache = new();
         private readonly Timer cleanupTimer;
         private readonly TimeSpan cleanupInterval = TimeSpan.FromHours(1);
         private readonly TimeSpan staleThreshold = TimeSpan.FromHours(12);
@@ -62,7 +62,7 @@ namespace OpFwder
 
             var question = query.Questions[0]; 
 
-            if (cache.TryGetValue(question, out var entry))
+            if (cache.TryGetValue((question,GetIpFromDns(query)), out var entry))
             {
                 var cachedMessage = entry.ResponseData;
                 var response = BuildResponseFromTemplate(query, cachedMessage);
@@ -82,7 +82,7 @@ namespace OpFwder
                     var upstreamResponse = await QueryUpstreamAsync(query);
                     if (upstreamResponse != null)
                     {
-                        cache[question] = new CacheEntry
+                        cache[(question, GetIpFromDns(query))] = new CacheEntry
                         {
                             ResponseData = upstreamResponse,
                             ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(upstreamResponse))
@@ -116,7 +116,7 @@ namespace OpFwder
                         ResponseData = newResponse,
                         ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(newResponse))
                     };
-                    cache[question] = entry;
+                    cache[(question, GetIpFromDns(originalQuery))] = entry;
                     Console.WriteLine($"UP: {question}");
                 }
             }
@@ -183,13 +183,32 @@ namespace OpFwder
             dnsServer?.Stop();
             cleanupTimer?.Dispose();
         }
+
+        private static IPAddress GetIpFromDns(DnsMessage dnsMsg)
+        {
+            try
+            {
+                if (dnsMsg is { IsEDnsEnabled: false }) return IPAddress.Any;
+                foreach (var eDnsOptionBase in dnsMsg.EDnsOptions.Options.ToList())
+                {
+                    if (eDnsOptionBase is ClientSubnetOption option)
+                        return option.Address;
+                }
+
+                return IPAddress.Any;
+            }
+            catch (Exception)
+            {
+                return IPAddress.Any;
+            }
+        }
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-            IPAddress upstream = IPAddress.Parse("8.8.8.8");     
+            IPAddress upstream = IPAddress.Parse("119.29.29.29");     
             IPEndPoint listenOn = new IPEndPoint(IPAddress.Any, 53);
 
             if (PortIsUse(53)) listenOn.Port = 6653;

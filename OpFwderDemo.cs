@@ -149,9 +149,8 @@ namespace OpFwder
         private int GetTtl(DnsMessage message)
         {
             if (!message.AnswerRecords.Any()) return MinTTL;
-            var ttl = MinTTL;
-            var minTtl = message.AnswerRecords.Min(x => x.TimeToLive);
-            if (ttl < MinTTL) ttl = minTtl;
+            var ttl = message.AnswerRecords.Min(x => x.TimeToLive);
+            if (ttl < MinTTL) ttl = MinTTL;
             if (ttl > MaxTTL) ttl = MaxTTL;
             return ttl;
         }

@@ -12,7 +12,11 @@ namespace OpFwder
         private readonly ConcurrentDictionary<DnsQuestion, CacheEntry> cache = new();
         private readonly Timer cleanupTimer;
         private readonly TimeSpan cleanupInterval = TimeSpan.FromHours(1);
-        private readonly TimeSpan staleThreshold = TimeSpan.FromHours(12); 
+        private readonly TimeSpan staleThreshold = TimeSpan.FromHours(12);
+
+        private readonly int MinTTL = 120;
+        private readonly int MaxTTL = 86400;
+
 
         private class CacheEntry
         {
@@ -81,7 +85,7 @@ namespace OpFwder
                         cache[question] = new CacheEntry
                         {
                             ResponseData = upstreamResponse,
-                            ExpiryTime = DateTime.UtcNow.AddSeconds(GetMinTtl(upstreamResponse))
+                            ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(upstreamResponse))
                         };
 
                         e.Response = upstreamResponse; 
@@ -107,11 +111,10 @@ namespace OpFwder
                 var newResponse = await QueryUpstreamAsync(originalQuery);
                 if (newResponse != null)
                 {
-                    var ttl = GetMinTtl(newResponse);
                     var entry = new CacheEntry
                     {
                         ResponseData = newResponse,
-                        ExpiryTime = DateTime.UtcNow.AddSeconds(ttl)
+                        ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(newResponse))
                     };
                     cache[question] = entry;
                     Console.WriteLine($"UP: {question}");
@@ -143,19 +146,14 @@ namespace OpFwder
             return response;
         }
 
-        private int GetMinTtl(DnsMessage message)
+        private int GetTtl(DnsMessage message)
         {
-            int minTtl = int.MaxValue;
-            foreach (var rec in message.AnswerRecords)
-                if (rec.TimeToLive < minTtl) minTtl = rec.TimeToLive;
-
-            if (minTtl == int.MaxValue)
-                foreach (var rec in message.AuthorityRecords)
-                    if (rec.TimeToLive < minTtl) minTtl = rec.TimeToLive;
-
-            if (minTtl == int.MaxValue) minTtl = 300;
-
-            return minTtl;
+            if (!message.AnswerRecords.Any()) return MinTTL;
+            var ttl = MinTTL;
+            var minTtl = message.AnswerRecords.Min(x => x.TimeToLive);
+            if (ttl < MinTTL) ttl = minTtl;
+            if (ttl > MaxTTL) ttl = MaxTTL;
+            return ttl;
         }
 
         private DnsMessage CreateErrorResponse(DnsMessage query, ReturnCode code)

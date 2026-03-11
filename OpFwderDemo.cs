@@ -9,7 +9,7 @@ namespace OpFwder
         private readonly IPAddress upstreamDns;
         private readonly int upstreamPort = 53;
         private readonly DnsServer dnsServer;
-        private static ConcurrentDictionary<(DnsQuestion, IPAddress), CacheEntry> cache = new();
+        private readonly ConcurrentDictionary<(DnsQuestion, IPAddress), CacheEntry> cache = new();
         private readonly Timer cleanupTimer;
         private readonly TimeSpan cleanupInterval = TimeSpan.FromHours(1);
         private readonly TimeSpan staleThreshold = TimeSpan.FromHours(12);
@@ -18,10 +18,10 @@ namespace OpFwder
         private readonly int MaxTTL = 86400;
 
 
-        private class CacheEntry
+        private class CacheEntry(DnsMessage responseData, DateTime expiryTime)
         {
-            public DnsMessage ResponseData { get; set; } 
-            public DateTime ExpiryTime { get; set; } // 过期时间（基于TTL）
+            public DnsMessage ResponseData { get; } = responseData;
+            public DateTime ExpiryTime { get; } = expiryTime; // 过期时间（基于TTL）
         }
 
         /// <summary>
@@ -82,11 +82,8 @@ namespace OpFwder
                     var upstreamResponse = await QueryUpstreamAsync(query);
                     if (upstreamResponse != null)
                     {
-                        cache[(question, GetIpFromDns(query))] = new CacheEntry
-                        {
-                            ResponseData = upstreamResponse,
-                            ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(upstreamResponse))
-                        };
+                        cache[(question, GetIpFromDns(query))] = new CacheEntry(upstreamResponse,
+                            DateTime.UtcNow.AddSeconds(GetTtl(upstreamResponse)));
 
                         e.Response = upstreamResponse; 
                     }
@@ -111,12 +108,8 @@ namespace OpFwder
                 var newResponse = await QueryUpstreamAsync(originalQuery);
                 if (newResponse != null)
                 {
-                    var entry = new CacheEntry
-                    {
-                        ResponseData = newResponse,
-                        ExpiryTime = DateTime.UtcNow.AddSeconds(GetTtl(newResponse))
-                    };
-                    cache[(question, GetIpFromDns(originalQuery))] = entry;
+                    cache[(question, GetIpFromDns(originalQuery))] = new CacheEntry(newResponse,
+                        DateTime.UtcNow.AddSeconds(GetTtl(newResponse)));
                     Console.WriteLine($"UP: {question}");
                 }
             }

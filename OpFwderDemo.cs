@@ -82,7 +82,7 @@ namespace OpFwder
                 try
                 {
                     var upstreamResponse = await QueryUpstreamAsync(query);
-                    if (upstreamResponse != null)
+                    if (upstreamResponse is { ReturnCode: ReturnCode.NoError or ReturnCode.NxDomain })
                     {
                         cache[(question, GetIpFromDns(query))] = new CacheEntry(upstreamResponse,
                             DateTime.UtcNow.AddSeconds(GetTtl(upstreamResponse)));
@@ -108,7 +108,7 @@ namespace OpFwder
             {
                 var question = originalQuery.Questions[0];
                 var newResponse = await QueryUpstreamAsync(originalQuery);
-                if (newResponse != null)
+                if (newResponse is {ReturnCode: ReturnCode.NoError or ReturnCode.NxDomain})
                 {
                     cache[(question, GetIpFromDns(originalQuery))] = new CacheEntry(newResponse,
                         DateTime.UtcNow.AddSeconds(GetTtl(newResponse)));
@@ -121,7 +121,7 @@ namespace OpFwder
             }
         }
 
-        private async Task<DnsMessage> QueryUpstreamAsync(DnsMessage query)
+        private async Task<DnsMessage?> QueryUpstreamAsync(DnsMessage query)
         {
             using var dnsClient = new DnsClient([upstreamDns], [new UdpClientTransport(upstreamPort)]);
             return await dnsClient.SendMessageAsync(query);

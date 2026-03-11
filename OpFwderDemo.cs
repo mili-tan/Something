@@ -65,7 +65,9 @@ namespace OpFwder
             if (cache.TryGetValue((question,GetIpFromDns(query)), out var entry))
             {
                 var cachedMessage = entry.ResponseData;
-                var response = BuildResponseFromTemplate(query, cachedMessage);
+                var response =
+                    BuildResponseFromTemplate(query, cachedMessage,
+                        (int) (entry.ExpiryTime - DateTime.UtcNow).TotalSeconds);
 
                 if (DateTime.UtcNow <= entry.ExpiryTime)
                 {
@@ -125,7 +127,7 @@ namespace OpFwder
             return await dnsClient.SendMessageAsync(query);
         }
 
-        private DnsMessage BuildResponseFromTemplate(DnsMessage query, DnsMessage template)
+        private DnsMessage BuildResponseFromTemplate(DnsMessage query, DnsMessage template, int ttl = 0)
         {
             var response = query.CreateResponseInstance();
             response.ReturnCode = template.ReturnCode;
@@ -134,7 +136,17 @@ namespace OpFwder
             response.IsAuthenticData = template.IsAuthenticData;
             response.IsCheckingDisabled = template.IsCheckingDisabled;
 
-            response.AnswerRecords.AddRange(template.AnswerRecords);
+            if (ttl < 30) ttl = 30;
+
+            foreach (var item in template.AnswerRecords.ToList())
+            {
+                if (item.RecordType == RecordType.A)
+                    response.AnswerRecords.Add(new ARecord(item.Name, ttl, ((ARecord) item).Address));
+                else if (item.RecordType == RecordType.Aaaa)
+                    response.AnswerRecords.Add(new AaaaRecord(item.Name, ttl, ((AaaaRecord) item).Address));
+                else
+                    response.AnswerRecords.Add(item);
+            }
 
             return response;
         }

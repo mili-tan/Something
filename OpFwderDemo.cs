@@ -9,7 +9,7 @@ namespace OpFwder
         private readonly IPAddress upstreamDns;
         private readonly int upstreamPort = 53;
         private readonly DnsServer dnsServer;
-        private readonly ConcurrentDictionary<(DnsQuestion, IPAddress), CacheEntry> cache = new();
+        private static ConcurrentDictionary<(DnsQuestion, IPAddress), CacheEntry> cache = new();
         private readonly Timer cleanupTimer;
         private readonly TimeSpan cleanupInterval = TimeSpan.FromHours(1);
         private readonly TimeSpan staleThreshold = TimeSpan.FromHours(12);
